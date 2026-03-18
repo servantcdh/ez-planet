@@ -22,7 +22,7 @@ jobs:
           scope: '@ez-planet'
 
       - name: Install dependencies
-        run: npm install
+        run: rm -f package-lock.json && npm install --no-package-lock
 
       - name: Build packages
         run: npm run build
