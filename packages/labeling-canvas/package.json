@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@erase2d/fabric": "^1.2.0",
+    "zundo": "^2.1.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

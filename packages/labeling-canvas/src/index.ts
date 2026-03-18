@@ -1,4 +1,4 @@
-// ─── Types ───
+// ─── Public Types ───
 export type {
   // Annotation
   Annotation,
@@ -51,17 +51,113 @@ export type {
   LabelingToolbarProps,
 } from './types/public'
 
-// ─── Components ───
-// TODO: Phase 1-2 에서 구현
-// export { LabelingWorkspace } from './components/LabelingWorkspace'
-// export { LabelingProvider } from './components/LabelingProvider'
-// export { LabelingCanvas } from './components/LabelingCanvas'
-// export { LabelingToolbar } from './components/LabelingToolbar'
-// export { LabelingNavigation } from './components/LabelingNavigation'
-// export { LabelingInfoPanel } from './components/LabelingInfoPanel'
+// ─── Canvas Core ───
+export {
+  loadFabric,
+  ensureCanvas,
+  getCanvasInstance,
+  setCanvasInstance,
+  subscribeLabelEvents,
+  emitLabelEvent,
+  getCanvasJSON,
+  getLabeledObjects,
+  getActiveLabeledObjects,
+  renderAllSafe,
+} from './canvas/core'
 
-// ─── Hooks ───
-// TODO: Phase 3 에서 구현
-// export { useLabelingTools } from './hooks/useLabelingTools'
-// export { useLabelingCanvas } from './hooks/useLabelingCanvas'
-// export { useLabelingHistory } from './hooks/useLabelingHistory'
+// ─── Canvas Tools ───
+export {
+  brushTool,
+  eraserTool,
+  magicbrushTool,
+  setMagicBrushModule,
+  polygonTool,
+  blankRectTool,
+  filledRectTool,
+  segmentAnythingTool,
+  selectionTool,
+  superpixelTool,
+  setSuperpixelModules,
+} from './canvas/tools'
+
+// ─── Serializer ───
+export {
+  fabricObjectToAnnotation,
+  canvasToAnnotations,
+  annotationToFabricProps,
+} from './canvas/serializer'
+
+// ─── Color Utilities ───
+export {
+  toRgba,
+  toRgbaArray,
+  toHex,
+  toRGBAHex,
+} from './canvas/colors'
+
+// ─── Image Utilities ───
+export {
+  createImage,
+  cropAlphaArea,
+  transparentBlackPixel,
+} from './canvas/image'
+
+// ─── Constants ───
+export {
+  TOOL_INFO_BRUSH,
+  TOOL_INFO_BOUNDED_BOX,
+  TOOL_INFO_FILLED_BOX,
+  TOOL_INFO_FILLED_POLYGON,
+  TOOL_INFO_MAGIC_BRUSH,
+  TOOL_INFO_SUPERPIXEL,
+  TOOL_INFO_ERASER,
+  TOOL_INFO_COMBINED_LABELS,
+  EXCEPTION_TOOLS,
+  EXPORT_PROPS,
+} from './canvas/constants'
+
+// ─── Stores ───
+export {
+  useToolSelectionStore,
+  getToolSelectionStore,
+  usePaletteStore,
+  useOpacityStore,
+  useBrushStore,
+  basicColors,
+  basicBrushes,
+  useLayerModeStore,
+  LAYER_MODE,
+  useCanvasObjectsStore,
+  useZoomStore,
+  createTemporalHistoryStore,
+} from './store'
+
+// ─── Components ───
+export {
+  LabelingWorkspace,
+  LabelingProvider,
+  useLabelingContext,
+  LabelingCanvas,
+  LabelingToolbar,
+  LabelingNavigation,
+  LabelingInfoPanel,
+  LabelingIndicator,
+  LabelingFloatingToolbar,
+  LabelingIssuePanel,
+} from './components'
+export type {
+  ToolbarItem,
+  ToolbarButtonItem,
+  ToolbarRadioItem,
+  ToolbarDividerItem,
+} from './components'
+
+// ─── Hooks (Level 3 Headless) ───
+export {
+  useLabelingTools,
+  useLabelingCanvas,
+  useLabelingHistory,
+} from './hooks'
+
+// ─── Extensions ───
+export { useExtensions } from './extensions'
