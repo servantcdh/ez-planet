@@ -328,7 +328,7 @@ export function LabelingProvider({
 
   return (
     <LabelingContext.Provider value={value}>
-      <div style={themeStyle as any}>{children}</div>
+      <div style={{ width: '100%', height: '100%', ...themeStyle } as any}>{children}</div>
     </LabelingContext.Provider>
   )
 }

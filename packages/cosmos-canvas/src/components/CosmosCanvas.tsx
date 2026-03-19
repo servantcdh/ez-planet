@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -61,7 +61,7 @@ function CosmosCanvasInner({
   const [showTutorial, setShowTutorial] = useState(showTutorialProp ?? false)
   const lastClickTime = useRef<number>(0)
   const lastClickNode = useRef<string>('')
-  const { setCenter } = useReactFlow()
+  const { setCenter, fitView } = useReactFlow()
 
   const updateView = useCallback(
     (next: CosmosView) => {
@@ -121,6 +121,39 @@ function CosmosCanvasInner({
     },
     [setNodes],
   )
+
+  // ─── Layout controls ───
+  const resetLayout = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        const planet = planets.find((p) => p.id === n.id)
+        if (!planet) return n
+        return { ...n, position: { x: planet.x, y: planet.y } }
+      }),
+    )
+    setTimeout(() => fitView({ duration: 600, padding: 0.2 }), 50)
+  }, [planets, setNodes, fitView])
+
+  const autoLayout = useCallback(() => {
+    const count = nodes.length
+    if (count === 0) return
+    const cx = 800
+    const cy = 400
+    const radius = Math.max(200, count * 40)
+    setNodes((nds) =>
+      nds.map((n, i) => {
+        const angle = (2 * Math.PI * i) / count - Math.PI / 2
+        return {
+          ...n,
+          position: {
+            x: cx + radius * Math.cos(angle),
+            y: cy + radius * Math.sin(angle),
+          },
+        }
+      }),
+    )
+    setTimeout(() => fitView({ duration: 600, padding: 0.2 }), 50)
+  }, [nodes.length, setNodes, fitView])
 
   // ─── Tutorial step → lifecycle flow visualization ───
   const handleTutorialStepChange = useCallback(
@@ -192,14 +225,16 @@ function CosmosCanvasInner({
         if (view.mode === 'inspecting' && view.planetId === node.id) {
           updateView({ mode: 'universe' })
           highlightPlanet(null)
+          setCenter(800, 400, { zoom: 0.8, duration: 600 })
         } else {
           updateView({ mode: 'inspecting', planetId: node.id })
           highlightPlanet(node.id)
+          setCenter(node.position.x + 50, node.position.y + 50, { zoom: 1.5, duration: 600 })
           if (planet) onPlanetClick?.(planet)
         }
       }
     },
-    [view, highlightPlanet, getPlanetById, updateView, onPlanetClick],
+    [view, highlightPlanet, getPlanetById, updateView, onPlanetClick, setCenter],
   )
 
   const handleEnterPlanet = useCallback(
@@ -234,8 +269,34 @@ function CosmosCanvasInner({
     if (view.mode === 'inspecting') {
       updateView({ mode: 'universe' })
       highlightPlanet(null)
+      setCenter(800, 400, { zoom: 0.8, duration: 600 })
     }
-  }, [view, highlightPlanet, updateView])
+  }, [view, highlightPlanet, updateView, setCenter])
+
+  const flyTo = useCallback(
+    (x: number, y: number, zoom: number, duration: number) => {
+      setCenter(x, y, { zoom, duration })
+    },
+    [setCenter],
+  )
+
+  // ─── Escape key: back to previous state ───
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (showTutorial) return // tutorial handles its own ESC
+
+      if (view.mode === 'inspecting') {
+        updateView({ mode: 'universe' })
+        highlightPlanet(null)
+        setCenter(800, 400, { zoom: 0.8, duration: 600 })
+      } else if (view.mode === 'planet') {
+        handleExitPlanet()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [view, showTutorial, updateView, highlightPlanet, setCenter, handleExitPlanet])
 
   const activePlanet = view.mode !== 'universe' ? getPlanetById(view.planetId) : undefined
   const isUniverseVisible = view.mode !== 'planet'
@@ -308,19 +369,41 @@ function CosmosCanvasInner({
             color="rgba(255, 255, 255, 0.05)"
           />
           <Controls
-            style={{
-              top: 60,
-              background: theme?.controlsBackground ?? 'rgba(20, 20, 40, 0.8)',
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-            }}
-          />
+            style={{ top: 60 }}
+            showInteractive={false}
+          >
+            {/* Reset to original positions */}
+            <button
+              className="react-flow__controls-button"
+              onClick={resetLayout}
+              title="Reset layout"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              </svg>
+            </button>
+            {/* Auto circular layout */}
+            <button
+              className="react-flow__controls-button"
+              onClick={autoLayout}
+              title="Auto layout"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <circle cx="12" cy="3" r="2"/>
+                <circle cx="19.8" cy="8" r="2"/>
+                <circle cx="17.6" cy="17" r="2"/>
+                <circle cx="6.4" cy="17" r="2"/>
+                <circle cx="4.2" cy="8" r="2"/>
+                <path d="M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2"/>
+              </svg>
+            </button>
+          </Controls>
           <MiniMap
-            style={{
-              background: 'rgba(10, 10, 26, 0.9)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
             nodeColor={(n) => (n.data?.color as string) || '#666'}
             maskColor="rgba(10, 10, 26, 0.7)"
+            style={{
+              background: 'rgba(10, 10, 26, 0.9)',
+            }}
           />
         </ReactFlow>
       </div>
@@ -352,6 +435,7 @@ function CosmosCanvasInner({
             onClose={() => {
               updateView({ mode: 'universe' })
               highlightPlanet(null)
+              setCenter(800, 400, { zoom: 0.8, duration: 600 })
             }}
             onEnterPlanet={() => handleEnterPlanet(activePlanet)}
             onSatelliteClick={onSatelliteClick}
@@ -369,12 +453,14 @@ function CosmosCanvasInner({
         {showTutorial && tutorialSteps && tutorialSteps.length > 0 && (
           <CosmosTutorial
             steps={tutorialSteps}
+            planets={planets}
             onHighlightPlanet={highlightPlanet}
             onStepChange={handleTutorialStepChange}
             onFinish={() => {
               setShowTutorial(false)
               onTutorialComplete?.()
             }}
+            flyTo={flyTo}
           />
         )}
       </AnimatePresence>

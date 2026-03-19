@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { TutorialStep } from '../types/public'
+import type { TutorialStep, PlanetConfig } from '../types/public'
 import styles from '../styles/cosmos.module.css'
 
 type TutorialPhase = 'welcome' | 'stepping' | 'complete'
 
 interface CosmosTutorialProps {
   steps: TutorialStep[]
+  planets: PlanetConfig[]
   onHighlightPlanet: (planetId: string | null) => void
   onStepChange: (stepIdx: number) => void
   onFinish: () => void
@@ -16,10 +17,11 @@ interface CosmosTutorialProps {
 
 export function CosmosTutorial({
   steps,
+  planets,
   onHighlightPlanet,
   onStepChange,
   onFinish,
-  flyTo: _flyTo,
+  flyTo,
 }: CosmosTutorialProps) {
   const [phase, setPhase] = useState<TutorialPhase>('welcome')
   const [currentStep, setCurrentStep] = useState(0)
@@ -32,9 +34,14 @@ export function CosmosTutorial({
       const step = steps[idx]
       if (step.planetId) {
         onHighlightPlanet(step.planetId)
+        // Fly camera to the planet's position
+        const planet = planets.find((p) => p.id === step.planetId)
+        if (planet && flyTo) {
+          flyTo(planet.x + 50, planet.y + 50, 1.5, 800)
+        }
       }
     },
-    [steps, onStepChange, onHighlightPlanet],
+    [steps, planets, onStepChange, onHighlightPlanet, flyTo],
   )
 
   const handleStart = useCallback(() => {
@@ -49,9 +56,10 @@ export function CosmosTutorial({
       setPhase('complete')
       onStepChange(-1) // reset
       onHighlightPlanet(null)
+      flyTo?.(800, 400, 0.8, 600) // zoom out to overview
       setTimeout(() => onFinish(), 1500)
     }
-  }, [currentStep, steps.length, goToStep, onStepChange, onHighlightPlanet, onFinish])
+  }, [currentStep, steps.length, goToStep, onStepChange, onHighlightPlanet, onFinish, flyTo])
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
@@ -62,8 +70,9 @@ export function CosmosTutorial({
   const handleSkip = useCallback(() => {
     onStepChange(-1)
     onHighlightPlanet(null)
+    flyTo?.(800, 400, 0.8, 600)
     onFinish()
-  }, [onStepChange, onHighlightPlanet, onFinish])
+  }, [onStepChange, onHighlightPlanet, onFinish, flyTo])
 
   // Keyboard controls
   useEffect(() => {
@@ -159,9 +168,14 @@ export function CosmosTutorial({
 
           {/* Footer */}
           <div className={styles.tutorialCardFooter}>
-            <span className={styles.tutorialStepCounter}>
-              {currentStep + 1} / {steps.length}
-            </span>
+            <button
+              className={styles.tutorialButton}
+              data-variant="ghost"
+              style={{ padding: '0.375rem 0.75rem', fontSize: '0.6875rem' }}
+              onClick={handleSkip}
+            >
+              SKIP
+            </button>
 
             <div className={styles.tutorialDots}>
               {steps.map((_, i) => (

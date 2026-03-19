@@ -2,7 +2,7 @@
 
 .workspace {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   grid-template-columns: 1fr;
   width: 100%;
   height: 100%;
@@ -17,7 +17,7 @@
 }
 
 .workspace[data-layout="with-nav-bottom"] {
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
 }
 
 /* ─── Main Section ─── */
@@ -27,50 +27,8 @@
   grid-template-columns: 1fr auto;
   grid-template-rows: auto 1fr;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
-}
-
-.controls {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--lc-border, #e2e8f0);
-  background: var(--lc-surface, #fff);
-  gap: 0.5rem;
-}
-
-.controlsLeft,
-.controlsRight {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.information {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.information em {
-  padding-right: 0.25rem;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.colorPreview {
-  width: 0.875rem;
-  aspect-ratio: 1;
-  border-radius: 0.125rem;
-}
-
-.zoomController input {
-  width: 4rem;
-  text-align: center;
 }
 
 /* ─── Canvas Area ─── */
@@ -79,6 +37,8 @@
   position: relative;
   overflow: hidden;
   background: #334155;
+  min-height: 0;
+  min-width: 0;
 }
 
 .canvasSection {
@@ -90,18 +50,11 @@
   -webkit-user-select: none;
 }
 
-.canvasSection > * {
+.imagePanel {
   position: absolute;
   top: 50%;
   left: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transform: translate(-50%, -50%);
-}
-
-.imagePanel {
-  position: relative;
   display: grid;
   place-items: center;
 }
@@ -128,9 +81,12 @@
 
 .sidePanel {
   width: 280px;
+  grid-row: 1 / -1;
+  grid-column: 2;
   border-left: 1px solid var(--lc-border, #e2e8f0);
   background: var(--lc-surface, #fff);
   overflow-y: auto;
+  min-height: 0;
 }
 
 /* ─── Record Classification ─── */
@@ -181,17 +137,19 @@
   background: #fff;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   border-radius: 0.5rem;
+  z-index: 40;
 }
 
 .floatingPanelIssue {
   right: 0.75rem;
   top: 0.75rem;
   width: 24rem;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .floatingPanelBody {
   margin-top: 1.5rem;
-  max-height: 60%;
 }
 
 .floatingPanelBody > * + * {

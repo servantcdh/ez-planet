@@ -19,6 +19,7 @@ export interface ToolInitConfig {
 export function useToolInit(
   currentTool: LabelingTool | null,
   config: ToolInitConfig,
+  canvasReady = false,
 ) {
   const cleanupRef = useRef<(() => void) | null>(null)
   const toolIdRef = useRef<string | null>(null)
@@ -127,7 +128,7 @@ export function useToolInit(
         cleanupRef.current = null
       }
     }
-  }, [currentTool])
+  }, [currentTool, canvasReady])
 
   return { activeToolId: toolIdRef.current }
 }

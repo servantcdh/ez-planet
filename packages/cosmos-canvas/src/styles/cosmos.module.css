@@ -188,6 +188,51 @@
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+/* ─── ReactFlow Controls (space-themed) ─── */
+
+.layerReactFlow :global(.react-flow__controls) {
+  background: rgba(10, 10, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.layerReactFlow :global(.react-flow__controls-button) {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  fill: rgba(255, 255, 255, 0.6);
+  width: 32px;
+  height: 32px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.layerReactFlow :global(.react-flow__controls-button:hover) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  fill: #fff;
+}
+
+.layerReactFlow :global(.react-flow__controls-button:last-child) {
+  border-bottom: none;
+}
+
+.layerReactFlow :global(.react-flow__controls-button svg) {
+  fill: inherit;
+}
+
+/* ─── ReactFlow MiniMap (space-themed) ─── */
+
+.layerReactFlow :global(.react-flow__minimap) {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 /* ─── Zoom Transition ─── */
 
 .zoomTransition {

@@ -68,7 +68,7 @@ export function LabelingCanvas({
     colorCode,
     brush,
     imageUrl,
-  })
+  }, mounted)
 
   // ─── Keyboard Shortcuts ───
   useKeyboardShortcuts({
