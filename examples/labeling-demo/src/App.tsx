@@ -3,9 +3,12 @@ import {
   LabelingWorkspace,
   type Annotation,
   type CanvasChangeEvent,
-  type CanvasState,
+  type SavePayload,
   type WorkspaceRecord,
+  type WorkspaceViewMode,
   type LabelingClass,
+  type TextContent,
+  type NumberContent,
 } from '@servantcdh/ez-planet-labeling'
 import '@servantcdh/ez-planet-labeling/dist/style.css'
 
@@ -120,14 +123,42 @@ const preExistingAnnotations: Record<string, Annotation[]> = {
   ],
 }
 
+// ─── Sample Text Content ───
+
+const sampleTextContent: TextContent = {
+  text: '서울 도심의 교차로에서 촬영된 이미지입니다. 여러 대의 차량과 보행자가 확인되며, 건물과 도로 표지판이 보입니다. 이 데이터셋은 자율주행 모델 학습을 위해 수집되었습니다.',
+  segments: [
+    { id: 'seg-1', start: 0, end: 20, label: 'Location', color: '#3498db' },
+    { id: 'seg-2', start: 21, end: 45, label: 'Objects', color: '#e74c3c' },
+  ],
+}
+
+// ─── Sample Number Content ───
+
+const sampleNumberContent: NumberContent = {
+  source: {
+    columns: ['Frame', 'Cars', 'Pedestrians', 'Confidence'],
+    rows: [
+      [1, 5, 3, 0.92],
+      [2, 4, 2, 0.88],
+      [3, 6, 4, 0.95],
+      [4, 3, 1, 0.79],
+      [5, 7, 5, 0.91],
+    ],
+  },
+  segments: [],
+}
+
 // ─── App ───
 
 export default function App() {
   const [activeRecordId, setActiveRecordId] = useState('1')
+  const [viewMode, setViewMode] = useState<WorkspaceViewMode>('Image')
   const [annotationStore, setAnnotationStore] = useState<Record<string, Annotation[]>>(preExistingAnnotations)
 
   const currentImage = sampleImages[activeRecordId]
   const currentAnnotations = annotationStore[activeRecordId] ?? []
+  const recordIdx = sampleRecords.findIndex((r) => r.id === activeRecordId)
 
   const handleChange = useCallback((event: CanvasChangeEvent) => {
     setAnnotationStore((prev) => ({
@@ -137,15 +168,25 @@ export default function App() {
     console.log(`[${activeRecordId}] ${event.action.type}:`, event.annotations.length, 'annotations')
   }, [activeRecordId])
 
-  const handleSave = useCallback(async (state: CanvasState) => {
-    console.log('Saved:', state)
-    alert(`Record ${activeRecordId}: ${state.annotations.length} annotations saved!`)
+  const handleSave = useCallback(async (payload: SavePayload) => {
+    console.log('Saved:', payload)
+    alert(`Record ${activeRecordId} saved! (viewMode: ${payload.viewMode}, inserts: ${payload.inserts.length}, updates: ${payload.updates.length}, deletes: ${payload.deletes.length})`)
   }, [activeRecordId])
 
   const handleRecordSelect = useCallback((record: WorkspaceRecord) => {
     setActiveRecordId(record.id)
     console.log('Record selected:', record.title)
   }, [])
+
+  const handleNavigateLeft = useCallback(() => {
+    const idx = sampleRecords.findIndex((r) => r.id === activeRecordId)
+    if (idx > 0) setActiveRecordId(sampleRecords[idx - 1].id)
+  }, [activeRecordId])
+
+  const handleNavigateRight = useCallback(() => {
+    const idx = sampleRecords.findIndex((r) => r.id === activeRecordId)
+    if (idx < sampleRecords.length - 1) setActiveRecordId(sampleRecords[idx + 1].id)
+  }, [activeRecordId])
 
   const labeledCount = Object.values(annotationStore).filter((a) => a.length > 0).length
 
@@ -155,12 +196,20 @@ export default function App() {
         image={currentImage}
         annotations={currentAnnotations}
         onChange={handleChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        availableViewModes={['Image', 'Text', 'Number']}
+        textContent={sampleTextContent}
+        numberContent={sampleNumberContent}
         records={sampleRecords}
         activeRecordId={activeRecordId}
         onRecordSelect={handleRecordSelect}
+        onNavigateLeft={handleNavigateLeft}
+        onNavigateRight={handleNavigateRight}
+        canNavigateLeft={recordIdx > 0}
+        canNavigateRight={recordIdx < sampleRecords.length - 1}
         classes={sampleClasses}
         onSave={handleSave}
-        tools={['selection', 'blankRect', 'polygon', 'brush', 'eraser']}
         mode="labeling"
         indicator={{
           title: 'Object Detection',

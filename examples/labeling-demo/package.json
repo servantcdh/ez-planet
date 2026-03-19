@@ -10,7 +10,7 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "fabric": "^6.5.0",
-    "@servantcdh/ez-planet-labeling": "^0.1.0"
+    "@servantcdh/ez-planet-labeling": "^0.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",
