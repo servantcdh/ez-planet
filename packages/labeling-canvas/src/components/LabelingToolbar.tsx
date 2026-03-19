@@ -36,6 +36,19 @@ function metaToToolbarItem(meta: ToolbarItemMeta): ToolbarItem {
   }
 
   if (meta.variant === 'radio') {
+    // Radio items with subButtonItems become button-with-sub for the floating toolbar
+    if (meta.subButtonItems?.length) {
+      return {
+        variant: 'button',
+        id: meta.id,
+        icon: meta.icon,
+        title: meta.title,
+        active: meta.checked,
+        disabled: meta.disabled,
+        onClick: meta.onClick,
+        subItems: meta.subButtonItems.map(metaToToolbarItem),
+      }
+    }
     return {
       variant: 'radio',
       id: meta.id,

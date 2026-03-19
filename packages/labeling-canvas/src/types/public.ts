@@ -105,16 +105,37 @@ export const WORKSPACE_VIEW_MODES = ['Record', 'Image', 'Text', 'Number', 'File'
 // ─── Content-Specific Data ───
 
 export interface TextContent {
-  value: string
+  /** The text string to display. Use `text` or `value`. */
+  text?: string
+  /** @deprecated Use `text` instead */
+  value?: string
   elementId?: string
+  segments?: Array<{
+    id: string
+    start: number
+    end: number
+    label?: string
+    color: string
+    opacity?: number
+  }>
 }
 
 export interface NumberContent {
-  mode: 'line' | 'bar'
-  xAxis: { label: string; ticks: unknown[] }
-  yAxis: { label: string; series: unknown[] }
-  source: { rows: unknown[]; columns: unknown[] }
-  canRender: boolean
+  mode?: 'line' | 'bar'
+  xAxis?: { label: string; ticks: unknown[] }
+  yAxis?: { label: string; series: unknown[] }
+  source: {
+    columns: string[] | Array<{ key: string; label: string }>
+    rows: unknown[][]  | Array<Record<string, unknown>>
+  }
+  canRender?: boolean
+  segments?: Array<{
+    id: string
+    start: number
+    end: number
+    color: string
+    opacity?: number
+  }>
 }
 
 export interface FileContent {

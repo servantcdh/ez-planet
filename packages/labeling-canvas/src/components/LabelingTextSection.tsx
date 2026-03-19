@@ -73,7 +73,9 @@ export function LabelingTextSection({
   }
 
   // Build rendered text with highlighted segments
-  const rendered = renderTextWithSegments(content.value, segments)
+  const text = content.text ?? content.value ?? ''
+  const allSegments = segments.length > 0 ? segments : (content.segments ?? [])
+  const rendered = renderTextWithSegments(text, allSegments)
 
   return (
     <div className={styles.textSection}>

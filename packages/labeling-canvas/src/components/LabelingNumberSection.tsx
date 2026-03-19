@@ -53,39 +53,45 @@ export function LabelingNumberSection({
   }
 
   const { source } = content
-  const columns = source.columns as Array<{ key: string; label: string }>
-  const rows = source.rows as Array<Record<string, unknown>>
+  const allSegments = segments.length > 0 ? segments : (content.segments ?? [])
+
+  // Normalize columns: accept string[] or {key,label}[]
+  const normalizedColumns: Array<{ key: string; label: string }> =
+    source.columns.map((col, i) =>
+      typeof col === 'string'
+        ? { key: String(i), label: col }
+        : col as { key: string; label: string },
+    )
+
+  // Normalize rows: accept number[][] or Record[]
+  const isArrayRows = Array.isArray(source.rows[0])
 
   return (
     <div className={styles.numberSection}>
       {/* Chart area — placeholder for host-app chart rendering */}
-      <div className={styles.chartArea}>
-        {content.canRender ? (
+      {content.canRender && (
+        <div className={styles.chartArea}>
           <div className={styles.chartPlaceholder}>
-            Chart ({content.mode}) — rendered by host app
+            Chart ({content.mode ?? 'line'}) — rendered by host app
           </div>
-        ) : (
-          <div className={styles.chartPlaceholder}>
-            Cannot render chart for this data
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Data Table */}
-      {rows.length > 0 && (
+      {source.rows.length > 0 && (
         <div className={styles.dataTable}>
           <table>
             <thead>
               <tr>
                 <th>#</th>
-                {columns.map((col) => (
+                {normalizedColumns.map((col) => (
                   <th key={col.key}>{col.label}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => {
-                const isSegmented = segments.some(
+              {source.rows.map((row, index) => {
+                const isSegmented = allSegments.some(
                   (s) => index >= s.start && index <= s.end,
                 )
                 return (
@@ -96,8 +102,14 @@ export function LabelingNumberSection({
                     style={{ cursor: readOnly ? 'default' : 'pointer' }}
                   >
                     <td>{index + 1}</td>
-                    {columns.map((col) => (
-                      <td key={col.key}>{String(row[col.key] ?? '')}</td>
+                    {normalizedColumns.map((col, colIdx) => (
+                      <td key={col.key}>
+                        {String(
+                          isArrayRows
+                            ? (row as unknown[])[colIdx] ?? ''
+                            : (row as Record<string, unknown>)[col.key] ?? '',
+                        )}
+                      </td>
                     ))}
                   </tr>
                 )

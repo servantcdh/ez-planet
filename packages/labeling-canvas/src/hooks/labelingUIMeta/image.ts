@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import type { LabelingUIMetaResult, ToolbarItemMeta } from './types'
 import { LabelingIcon } from '../../components/icons'
-import { useImageToolStore } from '../../store/image-tool.store'
+import { useToolSelectionStore } from '../../store/tool.store'
 import { useLayerModeStore, LAYER_MODE } from '../../store/layer.store'
 import {
   selectionTool,
@@ -25,8 +25,8 @@ function icon(name: LabelingIconName, size: 'sm' | 'xxs' = 'sm') {
 }
 
 export function useImageLabelingUIMeta(): LabelingUIMetaResult {
-  const tool = useImageToolStore((s) => s.tool)
-  const setTool = useImageToolStore((s) => s.setTool)
+  const tool = useToolSelectionStore((s) => s.tool)
+  const setTool = useToolSelectionStore((s) => s.setTool)
   const layerMode = useLayerModeStore((s) => s.mode)
   const cycleLayerMode = useLayerModeStore((s) => s.cycleMode)
 
