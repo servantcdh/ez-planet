@@ -1,3 +1,4 @@
+// Existing stores
 export { useToolSelectionStore, getToolSelectionStore } from './tool.store'
 export { usePaletteStore, useOpacityStore, useBrushStore, basicColors, basicBrushes } from './palette.store'
 export { createTemporalHistoryStore } from './history.store'
@@ -6,3 +7,19 @@ export { useLayerModeStore, LAYER_MODE, ORIGIN_LAYER_INDEX, OVERLAY_LAYER_INDEX 
 export type { LayerMode } from './layer.store'
 export { useCanvasObjectsStore } from './canvas-objects.store'
 export { useZoomStore } from './zoom.store'
+
+// New stores
+export { useViewModeStore, getViewModeStore } from './view-mode.store'
+export { useImageToolStore, getImageToolStore } from './image-tool.store'
+export { useTextToolStore } from './text-tool.store'
+export { useNumberToolStore } from './number-tool.store'
+export { useTextAutoHighlightStore } from './text-auto-highlight.store'
+export { useValidationModeStore } from './validation-mode.store'
+export { useLabelBatchStore } from './label-batch.store'
+export { useLabelSelectionStore } from './label-selection.store'
+export { useLabelVisibilityStore } from './label-visibility.store'
+export { useSelectedObjectsStore } from './selected-objects.store'
+export { useTextSegmentSelectionStore } from './text-segment-selection.store'
+export { useNumberSegmentSelectionStore } from './number-segment-selection.store'
+export { useIssuePanelStore } from './issue-panel.store'
+export { useWorkspaceLayoutStore } from './workspace-layout.store'

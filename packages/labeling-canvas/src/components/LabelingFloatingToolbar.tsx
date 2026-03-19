@@ -27,11 +27,21 @@ export interface ToolbarRadioItem {
   onClick?: () => void
 }
 
+export interface ToolbarCheckboxItem {
+  variant: 'checkbox'
+  id: string
+  icon?: ReactNode
+  title?: string
+  checked?: boolean
+  disabled?: boolean
+  onClick?: () => void
+}
+
 export interface ToolbarDividerItem {
   variant: 'divider'
 }
 
-export type ToolbarItem = ToolbarButtonItem | ToolbarRadioItem | ToolbarDividerItem
+export type ToolbarItem = ToolbarButtonItem | ToolbarRadioItem | ToolbarCheckboxItem | ToolbarDividerItem
 
 // ─── Component ───
 
@@ -83,6 +93,20 @@ function ToolbarItemRenderer({ item }: { item: ToolbarItem }) {
       >
         {item.icon}
       </button>
+    )
+  }
+
+  if (item.variant === 'checkbox') {
+    return (
+      <label className={styles.checkboxItem} title={item.title}>
+        <input
+          type="checkbox"
+          checked={item.checked ?? false}
+          disabled={item.disabled}
+          onChange={() => item.onClick?.()}
+        />
+        <span className={styles.checkboxLabel}>{item.title}</span>
+      </label>
     )
   }
 

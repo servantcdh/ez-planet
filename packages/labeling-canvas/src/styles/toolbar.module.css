@@ -133,3 +133,28 @@
 .toolButton[title]:hover::after {
   opacity: 1;
 }
+
+/* ─── Checkbox Item ─── */
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.375rem;
+  height: 2rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checkboxItem input[type="checkbox"] {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #fff;
+}
+
+.checkboxLabel {
+  font-size: 0.75rem;
+  color: #fff;
+}

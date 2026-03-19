@@ -1,6 +1,7 @@
 import type { LabelingWorkspaceProps } from '../types/public'
 import { LabelingProvider, useLabelingContext } from './LabelingProvider'
-import { LabelingCanvas } from './LabelingCanvas'
+import { LabelingWorkspaceControl } from './LabelingWorkspaceControl'
+import { LabelingWorkspaceSection } from './LabelingWorkspaceSection'
 import { LabelingNavigation } from './LabelingNavigation'
 import { LabelingInfoPanel } from './LabelingInfoPanel'
 import { LabelingToolbar } from './LabelingToolbar'
@@ -9,7 +10,7 @@ import styles from '../styles/workspace.module.css'
 
 /**
  * Level 1: All-in-one labeling workspace.
- * Renders Navigation + Toolbar + Canvas + InfoPanel in a single component.
+ * Renders WorkspaceControl + Navigation + WorkspaceSection + FloatingToolbar + InfoPanel.
  */
 export function LabelingWorkspace(props: LabelingWorkspaceProps) {
   return (
@@ -17,13 +18,30 @@ export function LabelingWorkspace(props: LabelingWorkspaceProps) {
       image={props.image}
       annotations={props.annotations}
       onChange={props.onChange}
+      viewMode={props.viewMode}
+      onViewModeChange={props.onViewModeChange}
+      availableViewModes={props.availableViewModes}
+      textContent={props.textContent}
+      numberContent={props.numberContent}
+      fileContent={props.fileContent}
       records={props.records}
       activeRecordId={props.activeRecordId}
       onRecordSelect={props.onRecordSelect}
       classes={props.classes}
+      policies={props.policies}
       onClassSelect={props.onClassSelect}
       onSave={props.onSave}
+      onSaveToRecord={props.onSaveToRecord
+        ? () => props.onSaveToRecord?.({ contentSetId: props.activeRecordId, labels: [] })
+        : undefined}
+      onFileUpload={props.onFileUpload
+        ? (file: File) => props.onFileUpload?.({ file, policyId: '', contentSetId: props.activeRecordId })
+        : undefined}
       isSaving={props.isSaving}
+      onNavigateLeft={props.onNavigateLeft}
+      onNavigateRight={props.onNavigateRight}
+      canNavigateLeft={props.canNavigateLeft}
+      canNavigateRight={props.canNavigateRight}
       mode={props.mode}
       onModeChange={props.onModeChange}
       validationResults={props.validationResults}
@@ -66,38 +84,49 @@ function WorkspaceInner() {
 
       {/* Main Area */}
       <div className={styles.mainSection}>
-        {/* Controls Bar */}
-        <div className={styles.controls}>
-          <div className={styles.controlsLeft}>
-            <LabelingIndicator indicator={ctx.indicator} />
-          </div>
-          <div className={styles.controlsRight}>
-            {/* Zoom info could go here */}
-          </div>
-        </div>
+        {/* WorkspaceControl (top bar) */}
+        <LabelingWorkspaceControl
+          viewMode={ctx.viewMode}
+          onViewModeChange={ctx.onViewModeChange}
+          availableViewModes={ctx.availableViewModes}
+          mode={ctx.mode}
+          onModeChange={ctx.onModeChange}
+          onSave={() => ctx.onSave({
+            viewMode: ctx.viewMode,
+            inserts: [],
+            updates: [],
+            deletes: [],
+          })}
+          onSaveToRecord={ctx.onSaveToRecord}
+          isSaving={ctx.isSaving}
+          onNavigateLeft={ctx.onNavigateLeft}
+          onNavigateRight={ctx.onNavigateRight}
+          canNavigateLeft={ctx.canNavigateLeft}
+          canNavigateRight={ctx.canNavigateRight}
+        />
 
-        {/* Canvas */}
+        {/* Content Area */}
         <div className={styles.canvasArea}>
-          <LabelingCanvas
+          <LabelingWorkspaceSection
+            viewMode={ctx.viewMode}
             image={ctx.image}
             annotations={ctx.annotations}
             onChange={ctx.onChange}
             readOnly={isReadOnly}
+            textContent={ctx.textContent}
+            numberContent={ctx.numberContent}
+            fileContent={ctx.fileContent}
+            onFileUpload={ctx.onFileUpload}
           />
 
-          {/* Floating Toolbar */}
-          {!isReadOnly && (
-            <LabelingToolbar
-              tools={ctx.tools}
-              onSave={() => ctx.onSave({
-                annotations: ctx.annotations,
-                canvasJSON: {},
-                image: typeof ctx.image === 'string'
-                  ? { width: 0, height: 0 }
-                  : { width: ctx.image.width, height: ctx.image.height },
-              })}
-              isSaving={ctx.isSaving}
-            />
+          {/* Floating Toolbar — shown for Image/Text/Number modes */}
+          {!isReadOnly && ctx.viewMode !== 'Record' && ctx.viewMode !== 'File' && (
+            <LabelingToolbar />
+          )}
+
+          {/* Indicator overlay */}
+          {ctx.indicator && (
+            <LabelingIndicator indicator={ctx.indicator} />
           )}
         </div>
 

@@ -96,9 +96,59 @@ export interface CanvasState {
   image: { width: number; height: number }
 }
 
+// ─── View Mode ───
+
+export type WorkspaceViewMode = 'Record' | 'Image' | 'Text' | 'Number' | 'File'
+
+export const WORKSPACE_VIEW_MODES = ['Record', 'Image', 'Text', 'Number', 'File'] as const
+
+// ─── Content-Specific Data ───
+
+export interface TextContent {
+  value: string
+  elementId?: string
+}
+
+export interface NumberContent {
+  mode: 'line' | 'bar'
+  xAxis: { label: string; ticks: unknown[] }
+  yAxis: { label: string; series: unknown[] }
+  source: { rows: unknown[]; columns: unknown[] }
+  canRender: boolean
+}
+
+export interface FileContent {
+  endpointUrl?: string
+  fileName?: string
+  fileType?: string
+}
+
 // ─── Navigation ───
 
 export type RecordStatus = 'unlabeled' | 'labeled' | 'validated' | 'issue'
+
+export interface NavigationSchema {
+  label: string
+  contentType: string
+  isRequired: boolean
+  maxItems?: number | null
+}
+
+export interface NavigationCellBadge {
+  title: string
+  style: 'primary-light' | 'secondary-light'
+}
+
+export interface NavigationCellAccessories {
+  badges?: NavigationCellBadge[]
+  hasIssue?: boolean
+  hasValidationCompleted?: boolean
+}
+
+export interface NavigationDetailData {
+  rows: Record<string, unknown>[]
+  columns?: string[]
+}
 
 export interface WorkspaceRecord {
   id: string
@@ -107,6 +157,11 @@ export interface WorkspaceRecord {
   status?: RecordStatus
   children?: WorkspaceRecord[]
   meta?: Record<string, unknown>
+  /** Schema-based table mode */
+  summary?: Record<string, string>
+  schemas?: NavigationSchema[]
+  accessories?: Record<string, NavigationCellAccessories>
+  detail?: NavigationDetailData
 }
 
 // ─── InfoPanel ───
@@ -117,6 +172,59 @@ export interface LabelingClass {
   color: string
   hotkey?: string
   group?: string
+}
+
+export interface LabelingPolicy {
+  id: string
+  name: string
+  classes: LabelingClass[]
+}
+
+// ─── Label Data (for batch operations) ───
+
+export interface LabelInsertData {
+  policyId: string
+  classIndex: number
+  className: string
+  labelValue: unknown
+  attributeValues?: Record<string, unknown>
+}
+
+export interface LabelUpdateData extends LabelInsertData {
+  id: string
+}
+
+export interface LabelDeleteData {
+  id: string
+}
+
+// ─── Save Payloads ───
+
+export interface SavePayload {
+  viewMode: WorkspaceViewMode
+  inserts: LabelInsertData[]
+  updates: LabelUpdateData[]
+  deletes: LabelDeleteData[]
+  canvasJSON?: object
+  imageSize?: { width: number; height: number }
+}
+
+export interface SaveToRecordPayload {
+  contentSetId: string
+  labels: LabelInsertData[]
+}
+
+export interface SaveValidationPayload {
+  result: boolean
+  reason?: string
+  labelIds: string[]
+}
+
+export interface FileUploadPayload {
+  file: File
+  policyId: string
+  contentSetId: string
+  elementId?: string
 }
 
 // ─── Validation ───
@@ -181,6 +289,11 @@ export type ToolType =
   | 'eraser'
   | 'magicbrush'
   | 'superpixel'
+  | 'segAnything'
+
+export type TextToolType = 'selection' | 'drag-segment'
+
+export type NumberToolType = 'selection' | 'drag-segment'
 
 export type ToolbarSection =
   | 'tools'
@@ -193,6 +306,34 @@ export type ToolbarSection =
   | 'validation'
   | 'navigation'
   | 'save'
+
+// ─── Icons ───
+
+export type LabelingIconName =
+  | 'icon-selection'
+  | 'icon-borderd-rect'
+  | 'icon-pen'
+  | 'icon-brush'
+  | 'icon-eraser'
+  | 'icon-magic-wand'
+  | 'icon-superpixel'
+  | 'icon-seg-anything'
+  | 'icon-undo'
+  | 'icon-redo'
+  | 'icon-save'
+  | 'icon-down'
+  | 'icon-all-layer'
+  | 'icon-bottom-layer'
+  | 'icon-top-layer'
+  | 'icon-plus'
+  | 'icon-minus'
+  | 'icon-left'
+  | 'icon-right'
+  | 'icon-issue'
+  | 'icon-labeling'
+  | 'icon-validated'
+  | 'icon-cancel'
+  | 'icon-highlight'
 
 // ─── Extension ───
 
@@ -254,20 +395,40 @@ export interface LabelingWorkspaceProps {
   annotations: Annotation[]
   onChange: (event: CanvasChangeEvent) => void
 
+  // View Mode
+  viewMode?: WorkspaceViewMode
+  onViewModeChange?: (mode: WorkspaceViewMode) => void
+  availableViewModes?: WorkspaceViewMode[]
+
+  // Content-specific data
+  textContent?: TextContent
+  numberContent?: NumberContent
+  fileContent?: FileContent
+
   // Navigation
   records: WorkspaceRecord[]
   activeRecordId: string
   onRecordSelect: (record: WorkspaceRecord) => void
+  onDetailExpand?: (record: WorkspaceRecord, schemaLabel: string) => void
   totalRecords?: number
   onPageChange?: (page: number) => void
 
   // InfoPanel
   classes: LabelingClass[]
+  policies?: LabelingPolicy[]
   onClassSelect?: (cls: LabelingClass) => void
 
-  // Actions
-  onSave: (state: CanvasState) => void | Promise<void>
+  // Save Actions
+  onSave: (payload: SavePayload) => void | Promise<void>
+  onSaveToRecord?: (payload: SaveToRecordPayload) => void | Promise<void>
+  onFileUpload?: (payload: FileUploadPayload) => void | Promise<void>
   isSaving?: boolean
+
+  // Navigation arrows
+  onNavigateLeft?: () => void
+  onNavigateRight?: () => void
+  canNavigateLeft?: boolean
+  canNavigateRight?: boolean
 
   // Mode
   mode?: WorkspaceMode
@@ -278,6 +439,7 @@ export interface LabelingWorkspaceProps {
   onValidate?: (event: ValidateEvent) => void | Promise<void>
   onValidationUpdate?: (event: ValidationUpdateEvent) => void | Promise<void>
   onValidationDelete?: (event: ValidationDeleteEvent) => void | Promise<void>
+  onSaveValidation?: (payload: SaveValidationPayload) => void | Promise<void>
 
   // Indicator
   indicator?: WorkspaceIndicator
@@ -289,6 +451,10 @@ export interface LabelingWorkspaceProps {
   tools?: ToolType[]
   theme?: Partial<LabelingTheme>
   layout?: WorkspaceLayout
+
+  // Dirty state
+  isDirty?: boolean
+  dirtyConfirmMessage?: string
 }
 
 // ─── Toolbar Props ───

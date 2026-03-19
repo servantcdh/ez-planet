@@ -2,31 +2,49 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
 import type {
   Annotation,
   CanvasChangeEvent,
-  CanvasState,
+  FileContent,
   LabelingClass,
   LabelingExtension,
+  LabelingPolicy,
   LabelingTheme,
+  NumberContent,
+  SavePayload,
+  TextContent,
   ToolType,
   ValidationResult,
   WorkspaceIndicator,
   WorkspaceLayout,
   WorkspaceMode,
   WorkspaceRecord,
+  WorkspaceViewMode,
 } from '../types/public'
+import { useViewModeStore } from '../store/view-mode.store'
+import { useValidationModeStore } from '../store/validation-mode.store'
 
 // ─── Context Value ───
 
-interface LabelingContextValue {
+export interface LabelingContextValue {
   // Canvas state
   image: string | { url: string; width: number; height: number }
   annotations: Annotation[]
   onChange: (event: CanvasChangeEvent) => void
+
+  // View mode
+  viewMode: WorkspaceViewMode
+  onViewModeChange: (mode: WorkspaceViewMode) => void
+  availableViewModes: WorkspaceViewMode[]
+
+  // Content-specific data
+  textContent?: TextContent
+  numberContent?: NumberContent
+  fileContent?: FileContent
 
   // Navigation
   records: WorkspaceRecord[]
@@ -35,6 +53,7 @@ interface LabelingContextValue {
 
   // InfoPanel
   classes: LabelingClass[]
+  policies: LabelingPolicy[]
   onClassSelect?: (cls: LabelingClass) => void
   selectedClassId: string | null
   setSelectedClassId: (id: string | null) => void
@@ -44,8 +63,16 @@ interface LabelingContextValue {
   setSelectedAnnotationId: (id: string | null) => void
 
   // Actions
-  onSave: (state: CanvasState) => void | Promise<void>
+  onSave: (payload: SavePayload) => void | Promise<void>
+  onSaveToRecord?: () => void
+  onFileUpload?: (file: File) => void
   isSaving: boolean
+
+  // Navigation arrows
+  onNavigateLeft?: () => void
+  onNavigateRight?: () => void
+  canNavigateLeft: boolean
+  canNavigateRight: boolean
 
   // Mode
   mode: WorkspaceMode
@@ -90,6 +117,16 @@ interface LabelingProviderProps {
   annotations: Annotation[]
   onChange: (event: CanvasChangeEvent) => void
 
+  // View mode
+  viewMode?: WorkspaceViewMode
+  onViewModeChange?: (mode: WorkspaceViewMode) => void
+  availableViewModes?: WorkspaceViewMode[]
+
+  // Content-specific data
+  textContent?: TextContent
+  numberContent?: NumberContent
+  fileContent?: FileContent
+
   // Navigation
   records: WorkspaceRecord[]
   activeRecordId: string
@@ -97,11 +134,20 @@ interface LabelingProviderProps {
 
   // InfoPanel
   classes: LabelingClass[]
+  policies?: LabelingPolicy[]
   onClassSelect?: (cls: LabelingClass) => void
 
   // Actions
-  onSave: (state: CanvasState) => void | Promise<void>
+  onSave: (payload: SavePayload) => void | Promise<void>
+  onSaveToRecord?: () => void
+  onFileUpload?: (file: File) => void
   isSaving?: boolean
+
+  // Navigation arrows
+  onNavigateLeft?: () => void
+  onNavigateRight?: () => void
+  canNavigateLeft?: boolean
+  canNavigateRight?: boolean
 
   // Mode
   mode?: WorkspaceMode
@@ -128,13 +174,26 @@ export function LabelingProvider({
   image,
   annotations,
   onChange,
+  viewMode: viewModeProp,
+  onViewModeChange: onViewModeChangeProp,
+  availableViewModes = ['Image'],
+  textContent,
+  numberContent,
+  fileContent,
   records,
   activeRecordId,
   onRecordSelect,
   classes,
+  policies = [],
   onClassSelect,
   onSave,
+  onSaveToRecord,
+  onFileUpload,
   isSaving = false,
+  onNavigateLeft,
+  onNavigateRight,
+  canNavigateLeft = false,
+  canNavigateRight = false,
   mode = 'labeling',
   onModeChange,
   validationResults = [],
@@ -152,22 +211,54 @@ export function LabelingProvider({
   )
   const [navVisible, setNavVisible] = useState(layout.navigation !== 'hidden')
 
+  // Sync viewMode prop with store
+  const setStoreViewMode = useViewModeStore((s) => s.setMode)
+  const storeViewMode = useViewModeStore((s) => s.mode)
+
+  const viewMode = viewModeProp ?? storeViewMode
+  const onViewModeChange = onViewModeChangeProp ?? setStoreViewMode
+
+  useEffect(() => {
+    if (viewModeProp) {
+      setStoreViewMode(viewModeProp)
+    }
+  }, [viewModeProp, setStoreViewMode])
+
+  // Sync validation mode
+  const setValidationMode = useValidationModeStore((s) => s.setValidationMode)
+  useEffect(() => {
+    setValidationMode(mode === 'validation')
+  }, [mode, setValidationMode])
+
   const value = useMemo<LabelingContextValue>(
     () => ({
       image,
       annotations,
       onChange,
+      viewMode,
+      onViewModeChange,
+      availableViewModes,
+      textContent,
+      numberContent,
+      fileContent,
       records,
       activeRecordId,
       onRecordSelect,
       classes,
+      policies,
       onClassSelect,
       selectedClassId,
       setSelectedClassId,
       selectedAnnotationId,
       setSelectedAnnotationId,
       onSave,
+      onSaveToRecord,
+      onFileUpload,
       isSaving,
+      onNavigateLeft,
+      onNavigateRight,
+      canNavigateLeft,
+      canNavigateRight,
       mode,
       onModeChange,
       validationResults,
@@ -185,15 +276,28 @@ export function LabelingProvider({
       image,
       annotations,
       onChange,
+      viewMode,
+      onViewModeChange,
+      availableViewModes,
+      textContent,
+      numberContent,
+      fileContent,
       records,
       activeRecordId,
       onRecordSelect,
       classes,
+      policies,
       onClassSelect,
       selectedClassId,
       selectedAnnotationId,
       onSave,
+      onSaveToRecord,
+      onFileUpload,
       isSaving,
+      onNavigateLeft,
+      onNavigateRight,
+      canNavigateLeft,
+      canNavigateRight,
       mode,
       onModeChange,
       validationResults,

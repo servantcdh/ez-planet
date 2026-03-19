@@ -1,0 +1,77 @@
+/* ─── File Section ─── */
+
+.fileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 1rem;
+  background: var(--lc-background, #fff);
+}
+
+.fileIcon {
+  width: 3rem;
+  height: 3rem;
+  color: var(--lc-text-secondary, #94a3b8);
+}
+
+.fileIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.fileName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lc-text, #1e293b);
+  text-align: center;
+  word-break: break-all;
+}
+
+.fileType {
+  font-size: 0.75rem;
+  color: var(--lc-text-secondary, #94a3b8);
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  max-width: 24rem;
+  padding: 2rem;
+  border: 2px dashed var(--lc-border, #e2e8f0);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.uploadArea:hover {
+  border-color: var(--lc-primary, #3b82f6);
+  background: var(--lc-hover, #f1f5f9);
+}
+
+.uploadText {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--lc-text-secondary, #64748b);
+}
+
+.uploadHint {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--lc-text-secondary, #94a3b8);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--lc-text-secondary, #94a3b8);
+  font-size: 0.875rem;
+}

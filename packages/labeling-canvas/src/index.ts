@@ -17,12 +17,34 @@ export type {
   CanvasAction,
   CanvasState,
 
+  // View Mode
+  WorkspaceViewMode,
+
+  // Content Types
+  TextContent,
+  NumberContent,
+  FileContent,
+
   // Navigation
   WorkspaceRecord,
   RecordStatus,
+  NavigationSchema,
+  NavigationCellBadge,
+  NavigationCellAccessories,
+  NavigationDetailData,
 
   // InfoPanel
   LabelingClass,
+  LabelingPolicy,
+
+  // Label Data
+  LabelInsertData,
+  LabelUpdateData,
+  LabelDeleteData,
+  SavePayload,
+  SaveToRecordPayload,
+  SaveValidationPayload,
+  FileUploadPayload,
 
   // Validation
   ValidationResult,
@@ -33,9 +55,14 @@ export type {
   // Indicator
   WorkspaceIndicator,
 
+  // Icons
+  LabelingIconName,
+
   // Theme & Config
   LabelingTheme,
   ToolType,
+  TextToolType,
+  NumberToolType,
   ToolbarSection,
   WorkspaceLayout,
   WorkspaceMode,
@@ -48,8 +75,9 @@ export type {
 
   // Component Props
   LabelingWorkspaceProps,
-  LabelingToolbarProps,
 } from './types/public'
+
+export { WORKSPACE_VIEW_MODES } from './types/public'
 
 // ─── Canvas Core ───
 export {
@@ -130,6 +158,22 @@ export {
   useCanvasObjectsStore,
   useZoomStore,
   createTemporalHistoryStore,
+  useViewModeStore,
+  getViewModeStore,
+  useImageToolStore,
+  getImageToolStore,
+  useTextToolStore,
+  useNumberToolStore,
+  useTextAutoHighlightStore,
+  useValidationModeStore,
+  useLabelBatchStore,
+  useLabelSelectionStore,
+  useLabelVisibilityStore,
+  useSelectedObjectsStore,
+  useTextSegmentSelectionStore,
+  useNumberSegmentSelectionStore,
+  useIssuePanelStore,
+  useWorkspaceLayoutStore,
 } from './store'
 
 // ─── Components ───
@@ -139,16 +183,24 @@ export {
   useLabelingContext,
   LabelingCanvas,
   LabelingToolbar,
+  LabelingWorkspaceControl,
+  LabelingWorkspaceSection,
+  LabelingTextSection,
+  LabelingNumberSection,
+  LabelingFileSection,
   LabelingNavigation,
   LabelingInfoPanel,
   LabelingIndicator,
   LabelingFloatingToolbar,
   LabelingIssuePanel,
+  LabelingIcon,
 } from './components'
 export type {
+  LabelingContextValue,
   ToolbarItem,
   ToolbarButtonItem,
   ToolbarRadioItem,
+  ToolbarCheckboxItem,
   ToolbarDividerItem,
 } from './components'
 
@@ -157,7 +209,17 @@ export {
   useLabelingTools,
   useLabelingCanvas,
   useLabelingHistory,
+  useLabelingUIMeta,
+  useToolInit,
+  useKeyboardShortcuts,
 } from './hooks'
+
+// ─── Shortcuts ───
+export {
+  LABELING_SHORTCUTS,
+  formatShortcutTitle,
+  getLabelingShortcutKey,
+} from './utils/labelingShortcuts'
 
 // ─── Extensions ───
 export { useExtensions } from './extensions'

@@ -11,6 +11,14 @@ import {
 import { canvasToAnnotations, annotationToFabricProps } from '../canvas/serializer'
 import { useZoomStore } from '../store/zoom.store'
 import { useCanvasObjectsStore } from '../store/canvas-objects.store'
+import { useToolSelectionStore } from '../store/tool.store'
+import { usePaletteStore, useBrushStore } from '../store/palette.store'
+import { useViewModeStore } from '../store/view-mode.store'
+import { useValidationModeStore } from '../store/validation-mode.store'
+import { useSelectedObjectsStore } from '../store/selected-objects.store'
+import { useToolInit } from '../hooks/useToolInit'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import { useLabelingTools } from '../hooks/useLabelingTools'
 import styles from '../styles/workspace.module.css'
 
 interface LabelingCanvasProps {
@@ -39,13 +47,156 @@ export function LabelingCanvas({
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
 
-  const setZoom = useZoomStore((s) => s.setZoom)
-  const setObjects = useCanvasObjectsStore((s) => s.setObjects)
+  const zoomStore = useZoomStore()
+  const setZoom = zoomStore.setZoom
+  const setCanvasObjects = useCanvasObjectsStore((s) => s.setObjects)
+
+  // Tool state
+  const currentTool = useToolSelectionStore((s) => s.tool)
+  const colorCode = usePaletteStore((s) => s.colorCode)
+  const brush = useBrushStore((s) => s.brush)
+  const viewMode = useViewModeStore((s) => s.mode)
+  const isValidationMode = useValidationModeStore((s) => s.isValidationMode)
+  const setSelectedObjects = useSelectedObjectsStore((s) => s.setObjects)
+  const { setTool } = useLabelingTools()
 
   // Resolve image URL and dimensions
   const imageUrl = typeof image === 'string' ? image : image.url
 
-  // Initialize Fabric canvas
+  // ─── Tool Init ───
+  useToolInit(currentTool, {
+    colorCode,
+    brush,
+    imageUrl,
+  })
+
+  // ─── Keyboard Shortcuts ───
+  useKeyboardShortcuts({
+    viewMode,
+    isValidationMode,
+    setTool,
+    disabled: readOnly,
+  })
+
+  // ─── Space-to-Pan ───
+  useEffect(() => {
+    if (readOnly) return
+
+    let isPanning = false
+    let isSpaceDown = false
+    let lastX = 0
+    let lastY = 0
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        const target = e.target as HTMLElement | null
+        if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return
+        e.preventDefault()
+        isSpaceDown = true
+        const canvas = getCanvasInstance()
+        if (canvas) {
+          canvas.defaultCursor = 'grab'
+          canvas.hoverCursor = 'grab'
+        }
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        isSpaceDown = false
+        isPanning = false
+        const canvas = getCanvasInstance()
+        if (canvas) {
+          canvas.defaultCursor = 'default'
+          canvas.hoverCursor = 'default'
+        }
+      }
+    }
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!isSpaceDown) return
+      isPanning = true
+      lastX = e.clientX
+      lastY = e.clientY
+      const canvas = getCanvasInstance()
+      if (canvas) {
+        canvas.defaultCursor = 'grabbing'
+        canvas.hoverCursor = 'grabbing'
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning) return
+      const canvas = getCanvasInstance()
+      if (!canvas) return
+
+      const vpt = canvas.viewportTransform
+      if (!vpt) return
+
+      const dx = e.clientX - lastX
+      const dy = e.clientY - lastY
+      vpt[4] += dx
+      vpt[5] += dy
+      canvas.setViewportTransform(vpt)
+      canvas.requestRenderAll()
+      lastX = e.clientX
+      lastY = e.clientY
+    }
+
+    const handleMouseUp = () => {
+      if (!isPanning) return
+      isPanning = false
+      const canvas = getCanvasInstance()
+      if (canvas && isSpaceDown) {
+        canvas.defaultCursor = 'grab'
+        canvas.hoverCursor = 'grab'
+      }
+    }
+
+    // Ctrl/Cmd + scroll-to-zoom
+    const handleWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return
+      e.preventDefault()
+      const canvas = getCanvasInstance()
+      if (!canvas) return
+
+      const delta = e.deltaY
+      const zoomLevel = canvas.getZoom()
+      const newZoom = delta > 0
+        ? Math.max(zoomLevel / 1.05, 0.1)
+        : Math.min(zoomLevel * 1.05, 5)
+
+      const point = canvas.getScenePoint(e)
+      canvas.zoomToPoint(point, newZoom)
+      canvas.requestRenderAll()
+
+      setZoom({
+        level: newZoom,
+        width: zoomStore.width,
+        height: zoomStore.height,
+      })
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
+    document.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    const container = containerRef.current
+    container?.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      container?.removeEventListener('wheel', handleWheel)
+    }
+  }, [readOnly, setZoom, zoomStore.width, zoomStore.height])
+
+  // ─── Initialize Fabric canvas ───
   useEffect(() => {
     if (typeof document === 'undefined') return
 
@@ -142,11 +293,11 @@ export function LabelingCanvas({
       }
 
       canvas.renderAll()
-      setObjects(canvas.getObjects() as LabeledFabricObject[])
+      setCanvasObjects(canvas.getObjects() as LabeledFabricObject[])
     }
 
     loadAnnotations()
-  }, [annotations, mounted, imageSize.width, imageSize.height, readOnly, setObjects])
+  }, [annotations, mounted, imageSize.width, imageSize.height, readOnly, setCanvasObjects])
 
   // Listen for canvas changes and emit onChange
   useEffect(() => {
@@ -161,7 +312,7 @@ export function LabelingCanvas({
         imageSize.width,
         imageSize.height,
       )
-      setObjects(objects)
+      setCanvasObjects(objects)
       onChangeRef.current?.({
         annotations: updatedAnnotations,
         action: {
@@ -183,7 +334,33 @@ export function LabelingCanvas({
         (canvas as any).off(event, handleChanged)
       }
     }
-  }, [mounted, imageSize.width, imageSize.height, setObjects])
+  }, [mounted, imageSize.width, imageSize.height, setCanvasObjects])
+
+  // ─── Track selection for selectedObjects store ───
+  useEffect(() => {
+    if (!mounted) return
+    const canvas = getCanvasInstance()
+    if (!canvas) return
+
+    const handleSelection = () => {
+      const active = canvas.getActiveObjects() as LabeledFabricObject[]
+      setSelectedObjects(active)
+    }
+
+    const handleSelectionCleared = () => {
+      setSelectedObjects([])
+    }
+
+    canvas.on('selection:created', handleSelection)
+    canvas.on('selection:updated', handleSelection)
+    canvas.on('selection:cleared', handleSelectionCleared)
+
+    return () => {
+      canvas.off('selection:created', handleSelection)
+      canvas.off('selection:updated', handleSelection)
+      canvas.off('selection:cleared', handleSelectionCleared)
+    }
+  }, [mounted, setSelectedObjects])
 
   // Subscribe to label events
   useEffect(() => {

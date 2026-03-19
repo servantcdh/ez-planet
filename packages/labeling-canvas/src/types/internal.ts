@@ -184,6 +184,45 @@ export interface ZoomPayload {
 
 // ─── Global Init ───
 
+// ─── Text/Number Tool Types ───
+
+export interface TextLabelingTool {
+  id: 'selection' | 'drag-segment'
+  label: string
+}
+
+export interface NumberLabelingTool {
+  id: 'selection' | 'drag-segment'
+  label: string
+}
+
+// ─── Text Segment Selection ───
+
+export interface TextSegmentSelection {
+  key: string
+  labelId: string | null
+  tempId: string | null
+  start: number
+  end: number
+  text: string
+  color?: string
+  opacity?: number
+}
+
+// ─── Number Segment Selection ───
+
+export interface NumberSegmentSelection {
+  key: string
+  labelId: string | null
+  tempId: string | null
+  start: number
+  end: number
+  color?: string
+  opacity?: number
+}
+
+// ─── Global Init ───
+
 export interface GlobalInitParams {
   labeler: string
   cvs: HTMLCanvasElement | string

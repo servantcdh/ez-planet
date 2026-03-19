@@ -9,6 +9,7 @@ import {
   polygonTool,
   blankRectTool,
   filledRectTool,
+  segmentAnythingTool,
   selectionTool,
   superpixelTool,
 } from '../canvas/tools'
@@ -22,6 +23,7 @@ const TOOL_FACTORIES: Record<ToolType, () => { id: string; init: (...args: any[]
   eraser: eraserTool,
   magicbrush: magicbrushTool,
   superpixel: superpixelTool,
+  segAnything: segmentAnythingTool,
 }
 
 /**
