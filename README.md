@@ -2,10 +2,10 @@
 
 MLOps 플랫폼을 위한 재사용 가능한 캔버스 라이브러리 모노레포.
 
-| Package | Description | Size (gzip) |
-|---------|-------------|-------------|
-| [`@servantcdh/ez-planet-labeling`](#labeling-canvas) | Fabric.js v6 기반 이미지 라벨링 워크스페이스 | JS 22.6KB, CSS 3.0KB |
-| [`@servantcdh/ez-planet-cosmos`](#cosmos-canvas) | ReactFlow + Three.js 코스모스 시각화 | JS 8.0KB, CSS 2.0KB |
+| Package | Description | Size (gzip) | Demo |
+|---------|-------------|-------------|------|
+| [`@servantcdh/ez-planet-labeling`](#labeling-canvas) | Fabric.js v6 기반 이미지 라벨링 워크스페이스 | JS 22.6KB, CSS 3.0KB | [![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/servantcdh/ez-planet/tree/master/examples/labeling-demo?file=src/App.tsx) |
+| [`@servantcdh/ez-planet-cosmos`](#cosmos-canvas) | ReactFlow + Three.js 코스모스 시각화 | JS 8.0KB, CSS 2.0KB | [![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/servantcdh/ez-planet/tree/master/examples/cosmos-demo?file=src/App.tsx) |
 
 ## Quick Start
 
