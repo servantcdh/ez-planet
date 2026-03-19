@@ -102,6 +102,7 @@ export interface CosmosCanvasProps {
   onPlanetEnter?: (planet: PlanetConfig) => void
   onPlanetExit?: () => void
   onSatelliteClick?: (event: CosmosNavigateEvent) => void
+  onPlanetDrag?: (planetId: string, position: { x: number; y: number }) => void
 
   // Tutorial
   tutorialSteps?: TutorialStep[]

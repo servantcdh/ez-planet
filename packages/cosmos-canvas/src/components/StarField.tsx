@@ -87,7 +87,8 @@ export function StarField({ config = {}, background }: StarFieldProps) {
   return (
     <Canvas
       camera={{ position: [0, 0, 15], fov: 60 }}
-      style={{ background: bg }}
+      style={{ background: bg, pointerEvents: 'none' }}
+      events={() => ({ enabled: false, priority: 0, compute: () => {} } as any)}
     >
       <ambientLight intensity={0.1} />
       <Stars config={config} />

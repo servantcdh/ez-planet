@@ -42,6 +42,7 @@ function CosmosCanvasInner({
   onPlanetEnter,
   onPlanetExit,
   onSatelliteClick,
+  onPlanetDrag,
   tutorialSteps,
   showTutorial: showTutorialProp,
   onTutorialComplete,
@@ -222,6 +223,13 @@ function CosmosCanvasInner({
     }, 100)
   }, [setCenter, updateView, onPlanetExit])
 
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      onPlanetDrag?.(node.id, { x: node.position.x, y: node.position.y })
+    },
+    [onPlanetDrag],
+  )
+
   const onPaneClick = useCallback(() => {
     if (view.mode === 'inspecting') {
       updateView({ mode: 'universe' })
@@ -281,9 +289,12 @@ function CosmosCanvasInner({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
+          onNodeDragStop={onNodeDragStop}
           onPaneClick={onPaneClick}
           nodeTypes={mergedNodeTypes}
           edgeTypes={mergedEdgeTypes}
+          nodesDraggable
+          nodeDragThreshold={5}
           fitView
           proOptions={{ hideAttribution: true }}
           style={{ background: 'transparent' }}
