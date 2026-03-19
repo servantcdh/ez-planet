@@ -12,12 +12,6 @@ Fabric.js v6 기반의 이미지 라벨링 워크스페이스 라이브러리.
 npm install @servantcdh/ez-planet-labeling
 ```
 
-> GitHub Packages 레지스트리를 사용합니다. `.npmrc`에 설정이 필요합니다.
->
-> ```
-> @servantcdh:registry=https://npm.pkg.github.com
-> ```
-
 ## Dependencies
 
 ### Peer Dependencies (호스트 앱에서 설치)

@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://npm.pkg.github.com
-          scope: '@servantcdh'
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: rm -f package-lock.json && npm install --no-package-lock
@@ -30,9 +28,9 @@ jobs:
       - name: Publish labeling-canvas
         run: npm publish --workspace=@servantcdh/ez-planet-labeling
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish cosmos-canvas
         run: npm publish --workspace=@servantcdh/ez-planet-cosmos
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
