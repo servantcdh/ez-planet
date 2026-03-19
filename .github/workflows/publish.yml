@@ -28,9 +28,9 @@ jobs:
       - name: Publish labeling-canvas
         run: npm publish --workspace=@servantcdh/ez-planet-labeling
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_SERVANTCDH }}
 
       - name: Publish cosmos-canvas
         run: npm publish --workspace=@servantcdh/ez-planet-cosmos
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_SERVANTCDH }}
