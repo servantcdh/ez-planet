@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com
-          scope: '@ez-planet'
+          scope: '@servantcdh'
 
       - name: Install dependencies
         run: rm -f package-lock.json && npm install --no-package-lock
@@ -28,11 +28,11 @@ jobs:
         run: npm run build
 
       - name: Publish labeling-canvas
-        run: npm publish --workspace=@ez-planet/labeling-canvas
+        run: npm publish --workspace=@servantcdh/labeling-canvas
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish cosmos-canvas
-        run: npm publish --workspace=@ez-planet/cosmos-canvas
+        run: npm publish --workspace=@servantcdh/cosmos-canvas
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
