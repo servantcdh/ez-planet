@@ -1,5 +1,5 @@
 {
-  "name": "@servantcdh/labeling-canvas",
+  "name": "@servantcdh/ez-planet-labeling",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",

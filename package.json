@@ -6,8 +6,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "build:labeling": "npm run build -w @servantcdh/labeling-canvas",
-    "build:cosmos": "npm run build -w @servantcdh/cosmos-canvas",
+    "build:labeling": "npm run build -w @servantcdh/ez-planet-labeling",
+    "build:cosmos": "npm run build -w @servantcdh/ez-planet-cosmos",
     "dev": "npm run dev --workspaces --if-present",
     "clean": "rm -rf packages/*/dist",
     "typecheck": "npm run typecheck --workspaces --if-present"

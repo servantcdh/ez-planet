@@ -28,11 +28,11 @@ jobs:
         run: npm run build
 
       - name: Publish labeling-canvas
-        run: npm publish --workspace=@servantcdh/labeling-canvas
+        run: npm publish --workspace=@servantcdh/ez-planet-labeling
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish cosmos-canvas
-        run: npm publish --workspace=@servantcdh/cosmos-canvas
+        run: npm publish --workspace=@servantcdh/ez-planet-cosmos
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
