@@ -1,5 +1,15 @@
-import type { LabelingUIMetaResult } from './types'
+import { baseBreadcrumbItems } from "./common";
+import type { LabelingUIMetaHook } from "./types";
 
-export function useFileLabelingUIMeta(): LabelingUIMetaResult {
-  return { toolbar: [] }
-}
+export const useFileLabelingUIMeta: LabelingUIMetaHook = ({
+  goToLabelingRoot,
+  title,
+}) => {
+  return {
+    toolbar: [],
+    breadcrumbItems: [
+      ...baseBreadcrumbItems({ goToLabelingRoot }),
+      { label: title ?? "File Labeling" },
+    ],
+  };
+};

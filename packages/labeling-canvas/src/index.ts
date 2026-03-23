@@ -1,225 +1,91 @@
-// ─── Public Types ───
+// Main workspace component (wrapped with required providers)
+export { LabelingWorkspace, type LabelingWorkspaceProps } from './components/LabelingWorkspaceWrapper';
+
+// Key symbol for virtualized records row meta
+export { VIRTUALIZED_RECORDS_ROW_META_SYMBOL } from './components/organisms/VirtualizedRecordsTable';
+
+// Domain types
 export type {
-  // Annotation
-  Annotation,
-  AnnotationType,
-  AnnotationGeometry,
-  AnnotationLabel,
-  AnnotationStyle,
-  BoxGeometry,
-  SegmentationGeometry,
-  PolygonGeometry,
-  BrushGeometry,
-  RecognitionGeometry,
-
-  // Events
-  CanvasChangeEvent,
-  CanvasAction,
-  CanvasState,
-
-  // View Mode
-  WorkspaceViewMode,
-
-  // Content Types
-  TextContent,
-  NumberContent,
-  FileContent,
-
-  // Navigation
-  WorkspaceRecord,
-  RecordStatus,
-  NavigationSchema,
-  NavigationCellBadge,
-  NavigationCellAccessories,
-  NavigationDetailData,
-
-  // InfoPanel
-  LabelingClass,
-  LabelingPolicy,
-
-  // Label Data
+  ApiResponse,
+  LabelingApiHeaders,
+  LabelInferenceType,
+  LabelType,
+  LabelUnitType,
+  LabelAttributeType,
+  LabelValue,
+  LabelDetailResponse,
+  LabelResponse,
   LabelInsertData,
   LabelUpdateData,
   LabelDeleteData,
-  SavePayload,
-  SaveToRecordPayload,
-  SaveValidationPayload,
-  FileUploadPayload,
+  LabelBatchUpdateRequest,
+  LabelBatchUpdateResponse,
+  LabelSearchRequest,
+  LabelSearchResult,
+  LabelContextResponse,
+  LabelContextCreateRequest,
+  LabelContextUpdateRequest,
+  ValidType,
+  ValidResultCreateRequest,
+  ValidResultUpdateRequest,
+  ValidResultResponse,
+  ContentsetStatusResponse,
+  ContentsetStatusState,
+  ContentsetStatus,
+  ClassificationValue,
+  BoxValue,
+  SegmentationResponseValue,
+  SegmentationBase64Value,
+  ChartValue,
+  RecognitionValue,
+  FileValue,
+  AttributeValue,
+} from './types/domain';
 
-  // Validation
-  ValidationResult,
-  ValidateEvent,
-  ValidationUpdateEvent,
-  ValidationDeleteEvent,
-
-  // Indicator
-  WorkspaceIndicator,
-
-  // Icons
-  LabelingIconName,
-
-  // Theme & Config
-  LabelingTheme,
-  ToolType,
-  TextToolType,
-  NumberToolType,
-  ToolbarSection,
-  WorkspaceLayout,
-  WorkspaceMode,
-
-  // Extension
-  LabelingExtension,
-  ToolExtension,
-  ExtensionContext,
-  CanvasPointerEvent,
-
-  // Component Props
-  LabelingWorkspaceProps,
-} from './types/public'
-
-export { WORKSPACE_VIEW_MODES } from './types/public'
-
-// ─── Canvas Core ───
-export {
-  loadFabric,
-  ensureCanvas,
-  getCanvasInstance,
-  setCanvasInstance,
-  subscribeLabelEvents,
-  emitLabelEvent,
-  getCanvasJSON,
-  getLabeledObjects,
-  getActiveLabeledObjects,
-  renderAllSafe,
-} from './canvas/core'
-
-// ─── Canvas Tools ───
-export {
-  brushTool,
-  eraserTool,
-  magicbrushTool,
-  setMagicBrushModule,
-  polygonTool,
-  blankRectTool,
-  filledRectTool,
-  segmentAnythingTool,
-  selectionTool,
-  superpixelTool,
-  setSuperpixelModules,
-} from './canvas/tools'
-
-// ─── Serializer ───
-export {
-  fabricObjectToAnnotation,
-  canvasToAnnotations,
-  annotationToFabricProps,
-} from './canvas/serializer'
-
-// ─── Color Utilities ───
-export {
-  toRgba,
-  toRgbaArray,
-  toHex,
-  toRGBAHex,
-} from './canvas/colors'
-
-// ─── Image Utilities ───
-export {
-  createImage,
-  cropAlphaArea,
-  transparentBlackPixel,
-} from './canvas/image'
-
-// ─── Constants ───
-export {
-  TOOL_INFO_BRUSH,
-  TOOL_INFO_BOUNDED_BOX,
-  TOOL_INFO_FILLED_BOX,
-  TOOL_INFO_FILLED_POLYGON,
-  TOOL_INFO_MAGIC_BRUSH,
-  TOOL_INFO_SUPERPIXEL,
-  TOOL_INFO_ERASER,
-  TOOL_INFO_COMBINED_LABELS,
-  EXCEPTION_TOOLS,
-  EXPORT_PROPS,
-} from './canvas/constants'
-
-// ─── Stores ───
-export {
-  useToolSelectionStore,
-  getToolSelectionStore,
-  usePaletteStore,
-  useOpacityStore,
-  useBrushStore,
-  basicColors,
-  basicBrushes,
-  useLayerModeStore,
-  LAYER_MODE,
-  useCanvasObjectsStore,
-  useZoomStore,
-  createTemporalHistoryStore,
-  useViewModeStore,
-  getViewModeStore,
-  useImageToolStore,
-  getImageToolStore,
-  useTextToolStore,
-  useNumberToolStore,
-  useTextAutoHighlightStore,
-  useValidationModeStore,
-  useLabelBatchStore,
-  useLabelSelectionStore,
-  useLabelVisibilityStore,
-  useSelectedObjectsStore,
-  useTextSegmentSelectionStore,
-  useNumberSegmentSelectionStore,
-  useIssuePanelStore,
-  useWorkspaceLayoutStore,
-} from './store'
-
-// ─── Components ───
-export {
-  LabelingWorkspace,
-  LabelingProvider,
-  useLabelingContext,
-  LabelingCanvas,
-  LabelingToolbar,
-  LabelingWorkspaceControl,
-  LabelingWorkspaceSection,
-  LabelingTextSection,
-  LabelingNumberSection,
-  LabelingFileSection,
-  LabelingNavigation,
-  LabelingInfoPanel,
-  LabelingIndicator,
-  LabelingFloatingToolbar,
-  LabelingIssuePanel,
-  LabelingIcon,
-} from './components'
+// Record selection types
 export type {
-  LabelingContextValue,
-  ToolbarItem,
-  ToolbarButtonItem,
-  ToolbarRadioItem,
-  ToolbarCheckboxItem,
-  ToolbarDividerItem,
-} from './components'
+  LabelingSchemaEntry,
+  LabelingDatasetCellReference,
+  LabelingRecordSelection,
+} from './types/recordSelection';
 
-// ─── Hooks (Level 3 Headless) ───
+// Providers — host wraps the workspace with these to supply data & mutations
+export { LabelingProviders, type LabelingProvidersProps } from './providers/LabelingProviders';
+export { type LabelingDataContextValue } from './providers/LabelingDataProvider';
 export {
-  useLabelingTools,
-  useLabelingCanvas,
-  useLabelingHistory,
-  useLabelingUIMeta,
-  useToolInit,
-  useKeyboardShortcuts,
-} from './hooks'
+  type LabelingMutationContextValue,
+  type LabelContextUpdateVariables,
+  type LabelBulkCreateVariables,
+  type LabelBatchUpdateVariables,
+  type FileLabelUploadVariables,
+  type ValidResultUpdateVariables,
+} from './providers/LabelingMutationProvider';
+export { type LabelingDatasetContextValue } from './providers/LabelingDatasetProvider';
+export { staticData, loadingData, errorData, IDLE_MUTATION, type AsyncData, type MutationState, type MutationSuccessHint } from './types/asyncData';
 
-// ─── Shortcuts ───
-export {
-  LABELING_SHORTCUTS,
-  formatShortcutTitle,
-  getLabelingShortcutKey,
-} from './utils/labelingShortcuts'
+// Stores (for external bootstrapping / demo)
+export { useWorkspaceNavigationDetailSelectionStore } from './store/workspaceNavigationDetailSelection.store';
+export { useFilterStore } from './lib/hooks/useSearchInfoMeta';
 
-// ─── Extensions ───
-export { useExtensions } from './extensions'
+// Policy types (for sample data typing)
+export type { PolicyDetail, Class as PolicyClass } from './features/policy/types/domain';
+
+// Dataset types (for sample data typing)
+export type {
+  DatasetDTO,
+  SchemaItemDTO,
+  VersionDTO,
+  DatasetContentRecord,
+  DatasetContentSearchResponse,
+  DatasetApiResponse,
+} from './features/dataset/types/domain';
+
+// Extensions — host-provided features plugged into render slots
+export type { LabelingExtension, ExtensionRenderContext, WorkspaceImageInfo } from './types/extension';
+
+// Canvas access — for extensions that interact with the fabric.js canvas
+export { getCanvasInstance } from './utils/imageLabelingCore';
+export { addCanvasObjects, removeCanvasObjects } from './store/workspaceCanvas.store';
+
+// Styles (injected into JS bundle via vite-plugin-css-injected-by-js)
+import './styles/globals.css';

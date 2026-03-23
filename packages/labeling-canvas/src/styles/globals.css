@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "./tailwind-custom.css";
+@import "./pretendard.css";
+
+/* ─── Design Tokens (scoped to .lc-root to avoid host conflicts) ─── */
+.lc-root {
+  /* color setting */
+  --color-primary: #3596b5;
+  --color-primary-100: #e8f5f8;
+  --color-primary-200: #d3edf3;
+  --color-primary-300: #bde4ec;
+  --color-primary-400: #a7dae5;
+  --color-primary-500: #91d0de;
+  --color-primary-600: #7bc6d7;
+  --color-primary-700: #65bcd0;
+  --color-primary-800: #4fb2c9;
+  --color-primary-900: #3a9ac0;
+  --color-primary-1000: #236377;
+
+  /* Secondary */
+  --color-secondary: #4c5fd1;
+  --color-secondary-100: #eceffa;
+  --color-secondary-200: #d9def5;
+  --color-secondary-300: #c5cdf0;
+  --color-secondary-400: #b2bcea;
+  --color-secondary-500: #9fabe5;
+  --color-secondary-600: #8b9adf;
+  --color-secondary-700: #7889da;
+  --color-secondary-800: #6477d4;
+  --color-secondary-900: #5166cf;
+  --color-secondary-1000: #323f8c;
+
+  /* Accent */
+  --color-accent: #f86a97;
+  --color-accent-100: #feeff4;
+  --color-accent-200: #fedfe8;
+  --color-accent-300: #fecfdd;
+  --color-accent-400: #fdbfd1;
+  --color-accent-500: #fdafc6;
+  --color-accent-600: #fc9fb9;
+  --color-accent-700: #fc8fad;
+  --color-accent-800: #fb7ea1;
+  --color-accent-900: #fb6e96;
+  --color-accent-1000: #bf456a;
+
+  --color-point: #364f6b;
+
+  --color-slate-0: #ffffff;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* radius setting */
+  --round-sm: 0.4rem;
+  --round-md: 0.5rem;
+  --round-lg: 0.6rem;
+
+  /* padding setting */
+  --padding-sm: 1rem;
+  --padding-md: 1.5rem;
+
+  /* scrollbar setting */
+  --scroll-width: 0.85rem;
+
+  /* base styles (replaces html, :host global reset) */
+  @apply leading-none text-slate-700;
+  font-family: "Pretendard", sans-serif;
+}
+
+/* ─── Utility classes (scoped to .lc-root) ─── */
+
+.lc-root .full-width {
+  @apply !w-full;
+}
+
+.lc-root .text-center {
+  text-align: center;
+}
+.lc-root .text-right {
+  text-align: right;
+}
+.lc-root .text-left {
+  text-align: left;
+}
+
+.lc-root .font-xs {
+  @apply text-xs leading-none;
+}
+.lc-root .font-sm {
+  @apply text-sm leading-none;
+}
+.lc-root .font-md {
+  @apply text-base leading-none;
+}
+.lc-root .font-lg {
+  @apply text-lg leading-none;
+}
+.lc-root .font-xl {
+  @apply text-xl leading-none;
+}
+.lc-root .font-2xl {
+  @apply text-2xl leading-none;
+}
+
+/* Ellipsis (scoped) */
+.lc-root input,
+.lc-root select,
+.lc-root button {
+  text-overflow: ellipsis;
+}
+
+/* Scrollbar (scoped) */
+.lc-root {
+  & *::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: var(--color-slate-300);
+    background-clip: padding-box;
+    border: 4px solid transparent;
+  }
+  & *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-slate-400);
+    background-clip: padding-box;
+  }
+}
+
+/* ─── Component & Page styles (to be modularized in Phase 2-4) ─── */
+@import "./components.css";
+@import "./page.css";

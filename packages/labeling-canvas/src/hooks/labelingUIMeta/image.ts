@@ -1,171 +1,245 @@
-import { createElement } from 'react'
-import type { LabelingUIMetaResult, ToolbarItemMeta } from './types'
-import { LabelingIcon } from '../../components/icons'
-import { useToolSelectionStore } from '../../store/tool.store'
-import { useLayerModeStore, LAYER_MODE } from '../../store/layer.store'
+import { useEffect, useMemo, useState } from "react";
+
+import type { IconName } from "@/components/atoms/Icon";
+import type { ToolbarItemType } from "@/types/toolbar";
+
+import { useImageTypeLabelingToolSelectionStore } from "../../store/imageTypeLabelingToolSelection.store";
+import { useLayerModeStore } from "../../store/layerMode.store";
 import {
-  selectionTool,
+  formatShortcutTitle,
+  LABELING_SHORTCUTS,
+} from "../../utils/labelingShortcuts";
+import {
   blankRectTool,
-  polygonTool,
   brushTool,
   eraserTool,
   magicbrushTool,
+  polygonTool,
+  selectionTool,
   superpixelTool,
-} from '../../canvas/tools'
-import {
-  LABELING_SHORTCUTS,
-  formatShortcutTitle,
-} from '../../utils/labelingShortcuts'
-import type { LabelingIconName } from '../../types/public'
+} from "../../utils/tools";
+import { baseBreadcrumbItems } from "./common";
+import type { LabelingUIMetaHook } from "./types";
 
-const SUB_TOOL_PANEL_BUTTON_ID = 'sub-tool-panel'
+type SubToolId = "magic-wand" | "superpixel";
 
-function icon(name: LabelingIconName, size: 'sm' | 'xxs' = 'sm') {
-  return createElement(LabelingIcon, { iconType: name, size })
-}
+const SUB_TOOL_PANEL_BUTTON_ID = "image-subToolPanel";
 
-export function useImageLabelingUIMeta(): LabelingUIMetaResult {
-  const tool = useToolSelectionStore((s) => s.tool)
-  const setTool = useToolSelectionStore((s) => s.setTool)
-  const layerMode = useLayerModeStore((s) => s.mode)
-  const cycleLayerMode = useLayerModeStore((s) => s.cycleMode)
+const subToolIconMap: Record<SubToolId, IconName> = {
+  "magic-wand": "icon-magic-wand",
+  superpixel: "icon-superpixel",
+} as const;
 
-  const toolId = tool?.id ?? 'selection'
-
-  // Determine icon for intelligent tools button
-  const intelligentToolIds = ['magic-brush', 'superpixel', 'seg-anything']
-  const isIntelligentActive = intelligentToolIds.includes(toolId)
-  const intelligentIcon: LabelingIconName =
-    toolId === 'superpixel'
-      ? 'icon-superpixel'
-      : toolId === 'seg-anything'
-        ? 'icon-seg-anything'
-        : 'icon-magic-wand'
-
-  // Layer mode icon
-  const layerIcon: LabelingIconName =
-    layerMode === LAYER_MODE.ONLY_ORIGIN
-      ? 'icon-bottom-layer'
-      : layerMode === LAYER_MODE.ONLY_OVERLAY
-        ? 'icon-top-layer'
-        : 'icon-all-layer'
-
-  const toolbar: ToolbarItemMeta[] = [
-    // Selection
-    {
-      variant: 'radio',
-      id: 'selection',
-      name: 'tool',
-      icon: icon('icon-selection'),
-      title: formatShortcutTitle('Selection', LABELING_SHORTCUTS.common.selection),
-      checked: toolId === 'selection',
-      onClick: () => setTool(selectionTool()),
-    },
-    { variant: 'divider' },
-    // Bounding Box
-    {
-      variant: 'radio',
-      id: 'bounded-box',
-      name: 'tool',
-      icon: icon('icon-borderd-rect'),
-      title: formatShortcutTitle('Bounding Box', LABELING_SHORTCUTS.image.boundingBox),
-      checked: toolId === 'bounded-box',
-      onClick: () => setTool(blankRectTool()),
-    },
-    // Pen
-    {
-      variant: 'radio',
-      id: 'polygon',
-      name: 'tool',
-      icon: icon('icon-pen'),
-      title: formatShortcutTitle('Pen', LABELING_SHORTCUTS.image.pen),
-      checked: toolId === 'polygon',
-      onClick: () => setTool(polygonTool()),
-    },
-    // Brush
-    {
-      variant: 'radio',
-      id: 'brush',
-      name: 'tool',
-      icon: icon('icon-brush'),
-      title: formatShortcutTitle('Brush', LABELING_SHORTCUTS.image.brush),
-      checked: toolId === 'brush',
-      onClick: () => setTool(brushTool()),
-    },
-    // Intelligent Tools (sub-panel)
-    {
-      variant: 'radio',
-      id: SUB_TOOL_PANEL_BUTTON_ID,
-      name: 'tool',
-      icon: icon(intelligentIcon),
-      title: 'Intelligent Tools',
-      checked: isIntelligentActive,
-      subButtonItems: [
-        {
-          variant: 'radio',
-          id: 'magic-brush',
-          name: 'sub-tool',
-          icon: icon('icon-magic-wand'),
-          title: formatShortcutTitle('Magic Brush', LABELING_SHORTCUTS.image.magicBrush),
-          checked: toolId === 'magic-brush',
-          onClick: () => setTool(magicbrushTool()),
+export const useImageLabelingUIMeta: LabelingUIMetaHook = ({
+  goToLabelingRoot,
+}) => {
+  const tool = useImageTypeLabelingToolSelectionStore((state) => state.tool);
+  const setTool = useImageTypeLabelingToolSelectionStore(
+    (state) => state.setTool
+  );
+  const layerMode = useLayerModeStore((state) => state.mode);
+  const cycleLayerMode = useLayerModeStore((state) => state.cycleMode);
+  const [isActiveSubToolPanel, setIsActiveSubToolPanel] = useState(false);
+  const [selectedSubToolId, setSelectedSubToolId] =
+    useState<SubToolId>("magic-wand");
+  const subButtonItems = useMemo<ToolbarItemType[] | undefined>(() => {
+    if (!isActiveSubToolPanel) {
+      return undefined;
+    }
+    return [
+      {
+        variant: "button",
+        iconType: subToolIconMap["magic-wand"],
+        tooltip: formatShortcutTitle(
+          "Magic Brush",
+          LABELING_SHORTCUTS.image.magicBrush
+        ),
+        disabled: false,
+        onClick: () => {
+          setTool(magicbrushTool());
+          setSelectedSubToolId("magic-wand");
+          setIsActiveSubToolPanel(false);
         },
-        {
-          variant: 'radio',
-          id: 'superpixel',
-          name: 'sub-tool',
-          icon: icon('icon-superpixel'),
-          title: formatShortcutTitle('Superpixel', LABELING_SHORTCUTS.image.superpixel),
-          checked: toolId === 'superpixel',
-          onClick: () => setTool(superpixelTool()),
-        },
-        {
-          variant: 'radio',
-          id: 'seg-anything',
-          name: 'sub-tool',
-          icon: icon('icon-seg-anything'),
-          title: 'Segment Anything',
-          checked: toolId === 'seg-anything',
-          disabled: true,
-          onClick: () => {},
-        },
-      ],
-      onClick: () => {
-        // Click the main button selects the last used intelligent tool
-        if (!isIntelligentActive) {
-          setTool(magicbrushTool())
-        }
       },
-    },
-    // Dropdown toggle (slim)
-    {
-      variant: 'button',
-      id: 'sub-tool-toggle',
-      icon: icon('icon-down', 'xxs'),
-      title: '',
-      slim: true,
-      onClick: () => {},
-    },
-    // Eraser
-    {
-      variant: 'radio',
-      id: 'eraser',
-      name: 'tool',
-      icon: icon('icon-eraser'),
-      title: formatShortcutTitle('Eraser', LABELING_SHORTCUTS.image.eraser),
-      checked: toolId === 'eraser',
-      onClick: () => setTool(eraserTool()),
-    },
-    { variant: 'divider' },
-    // Layer Mode
-    {
-      variant: 'button',
-      id: 'layer-mode',
-      icon: icon(layerIcon),
-      title: formatShortcutTitle('Layer', LABELING_SHORTCUTS.common.layerToggle),
-      onClick: cycleLayerMode,
-    },
-  ]
-
-  return { toolbar }
-}
+      {
+        variant: "button",
+        iconType: subToolIconMap.superpixel,
+        tooltip: formatShortcutTitle(
+          "Superpixel",
+          LABELING_SHORTCUTS.image.superpixel
+        ),
+        disabled: false,
+        onClick: () => {
+          setTool(superpixelTool());
+          setSelectedSubToolId("superpixel");
+          setIsActiveSubToolPanel(false);
+        },
+      },
+    ];
+  }, [
+    isActiveSubToolPanel,
+    setTool,
+    setSelectedSubToolId,
+    setIsActiveSubToolPanel,
+  ]);
+  const layerModeIconType = useMemo<IconName>(() => {
+    if (layerMode.length === 2) {
+      return `icon-all-layer` as IconName;
+    }
+    return `icon-${layerMode[0] ? "bottom" : "top"}-layer` as IconName;
+  }, [layerMode]);
+  useEffect(() => {
+    if (["magic-wand", "superpixel"].includes(tool?.id ?? "")) {
+      setSelectedSubToolId(tool?.id as SubToolId);
+    }
+    setIsActiveSubToolPanel(false);
+  }, [tool, setSelectedSubToolId]);
+  useEffect(() => {
+    if (!isActiveSubToolPanel) {
+      return;
+    }
+    if (typeof window === "undefined") {
+      return;
+    }
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const wrapper = target.closest(".button-with-sub");
+      if (wrapper && wrapper.querySelector(`#${SUB_TOOL_PANEL_BUTTON_ID}`)) {
+        return;
+      }
+      setIsActiveSubToolPanel(false);
+    };
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      window.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isActiveSubToolPanel]);
+  return {
+    toolbar: [
+      {
+        variant: "radio",
+        iconType: "icon-selection",
+        id: "selection",
+        name: "tool",
+        title: formatShortcutTitle(
+          "Selection",
+          LABELING_SHORTCUTS.common.selection
+        ),
+        disabled: false,
+        checked: tool?.id === "selection",
+        onClick: () => {
+          setTool(selectionTool());
+        },
+      },
+      { variant: "toolbarDivider" },
+      {
+        variant: "radio",
+        iconType: "icon-borderd-rect",
+        id: "bounded-box",
+        name: "tool",
+        title: formatShortcutTitle(
+          "Bounding Box",
+          LABELING_SHORTCUTS.image.boundingBox
+        ),
+        disabled: false,
+        checked: tool?.id === "bounded-box",
+        onClick: () => {
+          setTool(blankRectTool());
+        },
+      },
+      {
+        variant: "radio",
+        iconType: "icon-pen",
+        id: "pen",
+        name: "tool",
+        title: formatShortcutTitle("Pen", LABELING_SHORTCUTS.image.pen),
+        disabled: false,
+        checked: tool?.id === "pen",
+        onClick: () => {
+          setTool(polygonTool());
+        },
+      },
+      {
+        variant: "radio",
+        iconType: "icon-brush",
+        id: "brush",
+        name: "tool",
+        title: formatShortcutTitle("Brush", LABELING_SHORTCUTS.image.brush),
+        disabled: false,
+        checked: tool?.id === "brush",
+        onClick: () => {
+          setTool(brushTool());
+        },
+      },
+      {
+        variant: "radio",
+        iconType: subToolIconMap[selectedSubToolId],
+        name: "tool",
+        title:
+          selectedSubToolId === "magic-wand"
+            ? formatShortcutTitle(
+                "Magic Brush",
+                LABELING_SHORTCUTS.image.magicBrush
+              )
+            : formatShortcutTitle(
+                "Superpixel",
+                LABELING_SHORTCUTS.image.superpixel
+              ),
+        disabled: false,
+        checked: tool?.id === selectedSubToolId,
+        id: selectedSubToolId,
+        onClick: () => {
+          switch (selectedSubToolId) {
+            case "magic-wand":
+              setTool(magicbrushTool());
+              break;
+            case "superpixel":
+              setTool(superpixelTool());
+              break;
+            default:
+              break;
+          }
+        },
+      },
+      {
+        variant: "button",
+        iconType: "icon-down",
+        id: SUB_TOOL_PANEL_BUTTON_ID,
+        tooltip: "More tools",
+        onClick: () => {
+          setIsActiveSubToolPanel(!isActiveSubToolPanel);
+        },
+        disabled: false,
+        isSlim: true,
+        subButtonItems,
+      },
+      {
+        variant: "radio",
+        iconType: "icon-eraser",
+        id: "eraser",
+        name: "tool",
+        title: formatShortcutTitle("Eraser", LABELING_SHORTCUTS.image.eraser),
+        disabled: false,
+        checked: tool?.id === "eraser",
+        onClick: () => {
+          setTool(eraserTool());
+        },
+      },
+      { variant: "toolbarDivider" },
+      {
+        variant: "button",
+        iconType: layerModeIconType,
+        tooltip: formatShortcutTitle(
+          "Toggle layer mode",
+          LABELING_SHORTCUTS.common.layerToggle
+        ),
+        onClick: cycleLayerMode,
+        disabled: false,
+      },
+    ],
+    breadcrumbItems: baseBreadcrumbItems({ goToLabelingRoot }),
+  };
+};

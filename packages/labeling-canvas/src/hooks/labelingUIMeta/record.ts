@@ -1,44 +1,56 @@
-import { createElement } from 'react'
-import type { LabelingUIMetaResult, ToolbarItemMeta } from './types'
-import { LabelingIcon } from '../../components/icons'
-import { useLayerModeStore, LAYER_MODE } from '../../store/layer.store'
-import { LABELING_SHORTCUTS, formatShortcutTitle } from '../../utils/labelingShortcuts'
-import type { LabelingIconName } from '../../types/public'
+import { useMemo } from "react";
 
-function icon(name: LabelingIconName) {
-  return createElement(LabelingIcon, { iconType: name, size: 'sm' as const })
-}
+import type { IconName } from "@/components/atoms/Icon";
 
-export function useRecordLabelingUIMeta(): LabelingUIMetaResult {
-  const layerMode = useLayerModeStore((s) => s.mode)
-  const cycleLayerMode = useLayerModeStore((s) => s.cycleMode)
+import { useLayerModeStore } from "../../store/layerMode.store";
+import {
+  formatShortcutTitle,
+  LABELING_SHORTCUTS,
+} from "../../utils/labelingShortcuts";
+import { baseBreadcrumbItems } from "./common";
+import type { LabelingUIMetaHook } from "./types";
 
-  const layerIcon: LabelingIconName =
-    layerMode === LAYER_MODE.ONLY_ORIGIN
-      ? 'icon-bottom-layer'
-      : layerMode === LAYER_MODE.ONLY_OVERLAY
-        ? 'icon-top-layer'
-        : 'icon-all-layer'
-
-  const toolbar: ToolbarItemMeta[] = [
-    {
-      variant: 'radio',
-      id: 'selection',
-      name: 'tool',
-      icon: icon('icon-selection'),
-      title: formatShortcutTitle('Selection', LABELING_SHORTCUTS.common.selection),
-      checked: true,
-      onClick: () => {},
-    },
-    { variant: 'divider' },
-    {
-      variant: 'button',
-      id: 'layer-mode',
-      icon: icon(layerIcon),
-      title: formatShortcutTitle('Layer', LABELING_SHORTCUTS.common.layerToggle),
-      onClick: cycleLayerMode,
-    },
-  ]
-
-  return { toolbar }
-}
+export const useRecordLabelingUIMeta: LabelingUIMetaHook = ({
+  goToLabelingRoot,
+  title,
+}) => {
+  const layerMode = useLayerModeStore((state) => state.mode);
+  const cycleLayerMode = useLayerModeStore((state) => state.cycleMode);
+  const layerModeIconType = useMemo<IconName>(() => {
+    if (layerMode.length === 2) {
+      return `icon-all-layer` as IconName;
+    }
+    return `icon-${layerMode[0] ? "bottom" : "top"}-layer` as IconName;
+  }, [layerMode]);
+  return {
+    toolbar: [
+      {
+        variant: "radio",
+        iconType: "icon-selection",
+        id: "selection",
+        name: "tool",
+        title: formatShortcutTitle(
+          "Selection",
+          LABELING_SHORTCUTS.common.selection
+        ),
+        disabled: false,
+        defaultChecked: true,
+      },
+      { variant: "toolbarDivider" },
+      {
+        variant: "button",
+        iconType: layerModeIconType,
+        tooltip: formatShortcutTitle(
+          "Toggle layer mode",
+          LABELING_SHORTCUTS.common.layerToggle
+        ),
+        onClick: cycleLayerMode,
+        disabled: false,
+      },
+    ],
+    breadcrumbItems: [
+      ...baseBreadcrumbItems({ goToLabelingRoot }),
+      { label: title ?? "Record Labeling" },
+    ],
+  };
+};

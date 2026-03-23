@@ -1,73 +1,68 @@
-/**
- * Keyboard shortcut definitions matching portal-iris-web.
- */
+export type LabelingShortcutSpec = {
+  key: string;
+  label: string;
+};
+
+const createShortcut = (key: string): LabelingShortcutSpec => ({
+  key,
+  label: key === "\\" ? "\\" : key.toUpperCase(),
+});
 
 export const LABELING_SHORTCUTS = {
   common: {
-    selection: 'v',
-    layerToggle: '\\',
-    navigationToggle: 'g',
+    selection: createShortcut("v"),
+    layerToggle: createShortcut("\\"),
+    navigationToggle: createShortcut("g"),
   },
   image: {
-    boundingBox: 'u',
-    pen: 'p',
-    brush: 'b',
-    magicBrush: 'w',
-    superpixel: 'x',
-    eraser: 'e',
+    boundingBox: createShortcut("u"),
+    pen: createShortcut("p"),
+    brush: createShortcut("b"),
+    magicBrush: createShortcut("w"),
+    superpixel: createShortcut("x"),
+    eraser: createShortcut("e"),
   },
   text: {
-    highlighting: 'h',
-    autoHighlight: 'a',
+    highlighting: createShortcut("h"),
+    autoHighlight: createShortcut("a"),
   },
   number: {
-    highlighting: 'h',
+    highlighting: createShortcut("h"),
   },
   validation: {
-    rangeSelection: 's',
-    issue: 'i',
+    rangeSelection: createShortcut("s"),
+    issue: createShortcut("i"),
   },
-} as const
+} as const;
 
-export type ShortcutCategory = keyof typeof LABELING_SHORTCUTS
+export const formatShortcutTitle = (
+  title: string,
+  shortcut?: LabelingShortcutSpec
+): string => (shortcut ? `${title} (${shortcut.label})` : title);
 
-/**
- * Format a tool name with its shortcut key for display.
- * e.g. formatShortcutTitle("Selection", "v") → "Selection (V)"
- */
-export function formatShortcutTitle(title: string, shortcutKey: string): string {
-  if (!shortcutKey) return title
-  const display = shortcutKey === '\\' ? '\\' : shortcutKey.toUpperCase()
-  return `${title} (${display})`
-}
-
-/**
- * Normalize keyboard event to a shortcut key string.
- * Handles special cases like backslash.
- */
-export function getLabelingShortcutKey(event: KeyboardEvent): string {
-  if (event.key === '\\' || event.code === 'Backslash') {
-    return '\\'
+export const getLabelingShortcutKey = (event: KeyboardEvent): string => {
+  const rawKey = event.key;
+  if (!rawKey) {
+    return "";
   }
-  return event.key.toLowerCase()
-}
-
-/**
- * Whether to ignore a labeling shortcut event.
- * Returns true if focus is on input/textarea/contentEditable.
- */
-export function shouldIgnoreLabelingShortcutEvent(event: KeyboardEvent): boolean {
-  const target = event.target as HTMLElement | null
-  if (!target) return false
-
-  const tagName = target.tagName.toLowerCase()
-  if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
-    return true
+  const normalized = rawKey.toLowerCase();
+  if (normalized === "backslash") {
+    return "\\";
   }
+  return normalized;
+};
 
-  if (target.isContentEditable) {
-    return true
+export const shouldIgnoreLabelingShortcutEvent = (
+  target: EventTarget | null
+): boolean => {
+  if (!(target instanceof HTMLElement)) {
+    return false;
   }
-
-  return false
-}
+  const tagName = target.tagName.toLowerCase();
+  return (
+    target.isContentEditable ||
+    tagName === "input" ||
+    tagName === "textarea" ||
+    tagName === "select"
+  );
+};

@@ -1,0 +1,14 @@
+/* 수정된 CSS 코드 */
+@import "tailwindcss";
+
+@utility no-spinner {
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

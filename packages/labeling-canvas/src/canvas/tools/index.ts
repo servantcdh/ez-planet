@@ -1,8 +1,0 @@
-export { brushTool } from './brush'
-export { eraserTool } from './eraser'
-export { magicbrushTool, setMagicBrushModule } from './magicbrush'
-export { polygonTool } from './polygon'
-export { isEditablePolygon } from './polygonEditor'
-export { blankRectTool, filledRectTool, segmentAnythingTool } from './rect'
-export { selectionTool } from './selection'
-export { superpixelTool, setSuperpixelModules } from './superpixel'

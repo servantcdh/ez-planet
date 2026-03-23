@@ -1,9 +1,25 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+  RouterProvider,
+} from "@tanstack/react-router";
+import App from "./App";
 
-createRoot(document.getElementById('root')!).render(
+const rootRoute = createRootRoute({ component: App });
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+});
+
+const router = createRouter({
+  routeTree: rootRoute.addChildren([indexRoute]),
+});
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <RouterProvider router={router} />
+  </StrictMode>
+);

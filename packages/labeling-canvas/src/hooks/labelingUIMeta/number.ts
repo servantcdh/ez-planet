@@ -1,62 +1,82 @@
-import { createElement } from 'react'
-import type { LabelingUIMetaResult, ToolbarItemMeta } from './types'
-import { LabelingIcon } from '../../components/icons'
-import { useNumberToolStore } from '../../store/number-tool.store'
-import { useLayerModeStore, LAYER_MODE } from '../../store/layer.store'
+import { useEffect, useMemo } from "react";
+
+import type { IconName } from "@/components/atoms/Icon";
+
+import { useLayerModeStore } from "../../store/layerMode.store";
+import { useNumberLabelingToolSelectionStore } from "../../store/numberLabelingToolSelection.store";
 import {
-  LABELING_SHORTCUTS,
   formatShortcutTitle,
-} from '../../utils/labelingShortcuts'
-import type { LabelingIconName } from '../../types/public'
+  LABELING_SHORTCUTS,
+} from "../../utils/labelingShortcuts";
+import { dragSegmentTool, selectionTool } from "../../utils/numberLabelingTools";
+import { baseBreadcrumbItems } from "./common";
+import type { LabelingUIMetaHook } from "./types";
 
-function icon(name: LabelingIconName) {
-  return createElement(LabelingIcon, { iconType: name, size: 'sm' as const })
-}
+export const useNumberLabelingUIMeta: LabelingUIMetaHook = ({
+  goToLabelingRoot,
+  title,
+}) => {
+  const tool = useNumberLabelingToolSelectionStore((state) => state.tool);
+  const setTool = useNumberLabelingToolSelectionStore((state) => state.setTool);
+  const layerMode = useLayerModeStore((state) => state.mode);
+  const cycleLayerMode = useLayerModeStore((state) => state.cycleMode);
+  const layerModeIconType = useMemo<IconName>(() => {
+    if (layerMode.length === 2) {
+      return `icon-all-layer` as IconName;
+    }
+    return `icon-${layerMode[0] ? "bottom" : "top"}-layer` as IconName;
+  }, [layerMode]);
 
-export function useNumberLabelingUIMeta(): LabelingUIMetaResult {
-  const tool = useNumberToolStore((s) => s.tool)
-  const setTool = useNumberToolStore((s) => s.setTool)
-  const layerMode = useLayerModeStore((s) => s.mode)
-  const cycleLayerMode = useLayerModeStore((s) => s.cycleMode)
+  useEffect(() => {
+    if (!tool) {
+      setTool(selectionTool());
+    }
+  }, [setTool, tool]);
 
-  const toolId = tool?.id ?? 'selection'
-
-  const layerIcon: LabelingIconName =
-    layerMode === LAYER_MODE.ONLY_ORIGIN
-      ? 'icon-bottom-layer'
-      : layerMode === LAYER_MODE.ONLY_OVERLAY
-        ? 'icon-top-layer'
-        : 'icon-all-layer'
-
-  const toolbar: ToolbarItemMeta[] = [
-    {
-      variant: 'radio',
-      id: 'selection',
-      name: 'tool',
-      icon: icon('icon-selection'),
-      title: formatShortcutTitle('Selection', LABELING_SHORTCUTS.common.selection),
-      checked: toolId === 'selection',
-      onClick: () => setTool({ id: 'selection', label: 'Selection' }),
-    },
-    { variant: 'divider' },
-    {
-      variant: 'radio',
-      id: 'drag-segment',
-      name: 'tool',
-      icon: icon('icon-highlight'),
-      title: formatShortcutTitle('Highlighting', LABELING_SHORTCUTS.number.highlighting),
-      checked: toolId === 'drag-segment',
-      onClick: () => setTool({ id: 'drag-segment', label: 'Highlighting' }),
-    },
-    { variant: 'divider' },
-    {
-      variant: 'button',
-      id: 'layer-mode',
-      icon: icon(layerIcon),
-      title: formatShortcutTitle('Layer', LABELING_SHORTCUTS.common.layerToggle),
-      onClick: cycleLayerMode,
-    },
-  ]
-
-  return { toolbar }
-}
+  return {
+    toolbar: [
+      {
+        variant: "radio",
+        iconType: "icon-selection",
+        id: "selection",
+        name: "tool",
+        title: formatShortcutTitle(
+          "Selection",
+          LABELING_SHORTCUTS.common.selection
+        ),
+        disabled: false,
+        checked: tool?.id === "selection",
+        onClick: () => setTool(selectionTool()),
+      },
+      { variant: "toolbarDivider" },
+      {
+        variant: "radio",
+        iconType: "icon-cursor-number",
+        id: "drag-segment",
+        name: "tool",
+        title: formatShortcutTitle(
+          "Highlighting",
+          LABELING_SHORTCUTS.number.highlighting
+        ),
+        disabled: false,
+        checked: tool?.id === "drag-segment",
+        onClick: () => setTool(dragSegmentTool()),
+      },
+      { variant: "toolbarDivider" },
+      {
+        variant: "button",
+        iconType: layerModeIconType,
+        tooltip: formatShortcutTitle(
+          "Toggle layer mode",
+          LABELING_SHORTCUTS.common.layerToggle
+        ),
+        onClick: cycleLayerMode,
+        disabled: false,
+      },
+    ],
+    breadcrumbItems: [
+      ...baseBreadcrumbItems({ goToLabelingRoot }),
+      { label: title ?? "Number Labeling" },
+    ],
+  };
+};
