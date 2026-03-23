@@ -130,40 +130,33 @@ function buildDataset() {
   };
 }
 
-function buildContentsForRecord(rec: (typeof sampleRecords)[number]) {
-  if (rec.contentType === "CUSTOM") {
-    const text = sampleTexts[rec.contentSetId] ?? "";
-    return {
-      contents: { [rec.schemaName]: [{ value: text }] },
-      summary: { [rec.schemaName]: 1 },
-    };
-  }
-  if (rec.contentType === "TABLE") {
-    const rows = sampleNumberData[rec.contentSetId] ?? [];
-    return {
-      contents: {
-        [rec.schemaName]: rows.map((row) => ({
-          hour: row.hour,
-          temperature: String(row.temperature),
-          humidity: String(row.humidity),
-          trafficCount: String(row.trafficCount),
-          airQualityIndex: String(row.airQualityIndex),
-        })),
-      },
-      summary: { [rec.schemaName]: rows.length },
-    };
-  }
-  // IMAGE (default)
-  const img = sampleImages[rec.contentSetId];
+function buildAllContents(csId: string) {
+  const img = sampleImages[csId];
+  const text = sampleTexts[csId] ?? "";
+  const tableRows = sampleNumberData[csId] ?? [];
   return {
-    contents: { [rec.schemaName]: [{ endpointUrl: img?.url ?? "" }] },
-    summary: { [rec.schemaName]: 1 },
+    contents: {
+      image: [{ endpointUrl: img?.url ?? "" }],
+      text: [{ value: text }],
+      table: tableRows.map((row) => ({
+        hour: row.hour,
+        temperature: String(row.temperature),
+        humidity: String(row.humidity),
+        trafficCount: String(row.trafficCount),
+        airQualityIndex: String(row.airQualityIndex),
+      })),
+    },
+    summary: {
+      image: 1,
+      text: 1,
+      table: tableRows.length,
+    },
   };
 }
 
 function buildContentRecords() {
   return sampleRecords.map((rec) => {
-    const { contents, summary } = buildContentsForRecord(rec);
+    const { contents, summary } = buildAllContents(rec.contentSetId);
     return {
       id: rec.id,
       contentSetId: rec.contentSetId,
@@ -182,7 +175,7 @@ function buildContentRecords() {
 function buildContentDetail(contentSetId: string) {
   const rec = sampleRecords.find((r) => r.contentSetId === contentSetId);
   if (!rec) return null;
-  const { contents, summary } = buildContentsForRecord(rec);
+  const { contents, summary } = buildAllContents(rec.contentSetId);
   return {
     id: rec.id,
     contentSetId: rec.contentSetId,
@@ -329,7 +322,7 @@ function useSeedSelectionStore() {
       columnName: null,
       contentType: "IMAGE",
       contentSetId: firstRecord.contentSetId,
-      schemaName: firstRecord.schemaName,
+      schemaName: "image",
       elementId: null,
       selectedRows: [0],
     });

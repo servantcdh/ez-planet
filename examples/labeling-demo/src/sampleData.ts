@@ -174,16 +174,14 @@ export interface SampleRecord {
   id: string;
   contentSetId: string;
   label: string;
-  schemaName: string;
-  contentType: string;
 }
 
 export const sampleRecords: SampleRecord[] = [
-  { id: "r-1", contentSetId: "cs-1", label: "city_street_01.jpg", schemaName: "image", contentType: "IMAGE" },
-  { id: "r-2", contentSetId: "cs-2", label: "downtown_02.jpg", schemaName: "image", contentType: "IMAGE" },
-  { id: "r-3", contentSetId: "cs-3", label: "park_trees_03.jpg", schemaName: "image", contentType: "IMAGE" },
-  { id: "r-4", contentSetId: "cs-4", label: "city_description_04.txt", schemaName: "text", contentType: "CUSTOM" },
-  { id: "r-5", contentSetId: "cs-5", label: "environmental_data_05.csv", schemaName: "table", contentType: "TABLE" },
+  { id: "r-1", contentSetId: "cs-1", label: "city_street_01" },
+  { id: "r-2", contentSetId: "cs-2", label: "downtown_02" },
+  { id: "r-3", contentSetId: "cs-3", label: "park_trees_03" },
+  { id: "r-4", contentSetId: "cs-4", label: "highway_04" },
+  { id: "r-5", contentSetId: "cs-5", label: "shopping_05" },
 ];
 
 // ─── Pre-existing Labels for Record 2 ──────────────────────────
