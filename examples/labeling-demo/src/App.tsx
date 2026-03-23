@@ -23,6 +23,14 @@ const DATASET_VERSION = "v1";
 const POLICY_IDS = samplePolicies.map((p) => p.id);
 const NOW = new Date().toISOString();
 
+// Seed filter store synchronously (before any component mounts)
+// so that InfoPanel's initial selectedPolicyId picks up the first policy.
+useFilterStore.getState().setFilter({
+  policyIds: { operator: "IN", value: POLICY_IDS },
+  datasetId: { operator: "EQ", value: DATASET_ID },
+  datasetVersion: { operator: "EQ", value: DATASET_VERSION },
+});
+
 // ─── Data builders ──────────────────────────────────────────────
 
 function buildPolicyDetails() {
@@ -138,7 +146,8 @@ function buildAllContents(csId: string) {
     contents: {
       image: [{ endpointUrl: img?.url ?? "" }],
       text: [{ value: text }],
-      table: tableRows.map((row) => ({
+      table: tableRows.map((row, idx) => ({
+        elementId: `${csId}-table-${idx}`,
         hour: row.hour,
         temperature: String(row.temperature),
         humidity: String(row.humidity),
@@ -297,15 +306,8 @@ function useProviderData() {
 
 // ─── Seed stores ────────────────────────────────────────────────
 
-function useSeedFilterStore() {
-  useEffect(() => {
-    useFilterStore.getState().setFilter({
-      policyIds: { operator: "IN", value: POLICY_IDS },
-      datasetId: { operator: "EQ", value: DATASET_ID },
-      datasetVersion: { operator: "EQ", value: DATASET_VERSION },
-    });
-  }, []);
-}
+// Filter store is seeded at module level (line 25-29) so InfoPanel
+// initialises selectedPolicyId correctly on first render.
 
 function useSeedSelectionStore() {
   const setSelectionSnapshot = useWorkspaceNavigationDetailSelectionStore(
@@ -332,7 +334,6 @@ function useSeedSelectionStore() {
 // ─── App ────────────────────────────────────────────────────────
 
 export default function App() {
-  useSeedFilterStore();
   useSeedSelectionStore();
 
   const { dataCtx, datasetCtx } = useProviderData();
