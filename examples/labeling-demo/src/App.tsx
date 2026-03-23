@@ -10,7 +10,13 @@ import {
   type LabelingMutationContextValue,
   type LabelingDatasetContextValue,
 } from "@servantcdh/ez-planet-labeling";
-import { sampleImages, samplePolicies, sampleRecords } from "./sampleData";
+import {
+  sampleImages,
+  sampleTexts,
+  sampleNumberData,
+  samplePolicies,
+  sampleRecords,
+} from "./sampleData";
 
 const DATASET_ID = "dataset-demo-001";
 const DATASET_VERSION = "v1";
@@ -90,6 +96,28 @@ function buildDataset() {
         },
         properties: {},
       },
+      {
+        baseInfo: {
+          schemaName: "text",
+          contentType: "CUSTOM",
+          contentSize: 1,
+          isRequired: false,
+          isPreset: false,
+          isVisible: true,
+        },
+        properties: {},
+      },
+      {
+        baseInfo: {
+          schemaName: "table",
+          contentType: "TABLE",
+          contentSize: 6,
+          isRequired: false,
+          isPreset: false,
+          isVisible: true,
+        },
+        properties: {},
+      },
     ],
     importTransactionId: undefined,
     createdId: "demo",
@@ -98,22 +126,51 @@ function buildDataset() {
     modifiedId: "demo",
     modifiedBy: "demo",
     modifiedDate: NOW,
-    schemaTypes: ["IMAGE"] as const,
+    schemaTypes: ["IMAGE", "CUSTOM", "TABLE"] as const,
+  };
+}
+
+function buildContentsForRecord(rec: (typeof sampleRecords)[number]) {
+  if (rec.contentType === "CUSTOM") {
+    const text = sampleTexts[rec.contentSetId] ?? "";
+    return {
+      contents: { [rec.schemaName]: [{ value: text }] },
+      summary: { [rec.schemaName]: 1 },
+    };
+  }
+  if (rec.contentType === "TABLE") {
+    const rows = sampleNumberData[rec.contentSetId] ?? [];
+    return {
+      contents: {
+        [rec.schemaName]: rows.map((row) => ({
+          hour: row.hour,
+          temperature: String(row.temperature),
+          humidity: String(row.humidity),
+          trafficCount: String(row.trafficCount),
+          airQualityIndex: String(row.airQualityIndex),
+        })),
+      },
+      summary: { [rec.schemaName]: rows.length },
+    };
+  }
+  // IMAGE (default)
+  const img = sampleImages[rec.contentSetId];
+  return {
+    contents: { [rec.schemaName]: [{ endpointUrl: img?.url ?? "" }] },
+    summary: { [rec.schemaName]: 1 },
   };
 }
 
 function buildContentRecords() {
   return sampleRecords.map((rec) => {
-    const img = sampleImages[rec.contentSetId];
+    const { contents, summary } = buildContentsForRecord(rec);
     return {
       id: rec.id,
       contentSetId: rec.contentSetId,
       datasetId: DATASET_ID,
       version: DATASET_VERSION,
-      contents: {
-        [rec.schemaName]: [{ endpointUrl: img?.url ?? "" }],
-      },
-      summary: { [rec.schemaName]: 1 },
+      contents,
+      summary,
       createdBy: "demo",
       createdDate: NOW,
       modifiedBy: "demo",
@@ -125,16 +182,14 @@ function buildContentRecords() {
 function buildContentDetail(contentSetId: string) {
   const rec = sampleRecords.find((r) => r.contentSetId === contentSetId);
   if (!rec) return null;
-  const img = sampleImages[rec.contentSetId];
+  const { contents, summary } = buildContentsForRecord(rec);
   return {
     id: rec.id,
     contentSetId: rec.contentSetId,
     datasetId: DATASET_ID,
     version: DATASET_VERSION,
-    contents: {
-      [rec.schemaName]: [{ endpointUrl: img?.url ?? "" }],
-    },
-    summary: { [rec.schemaName]: 1 },
+    contents,
+    summary,
     createdBy: "demo",
     createdDate: NOW,
     modifiedBy: "demo",
@@ -174,7 +229,7 @@ const MUTATIONS_CTX: LabelingMutationContextValue = {
 
 function useProviderData() {
   const selectedContentSetId = useWorkspaceNavigationDetailSelectionStore(
-    (s) => s.selectionSnapshot?.contentSetId ?? null,
+    (s) => s.contentSetId,
   );
 
   const records = useMemo(() => buildContentRecords(), []);

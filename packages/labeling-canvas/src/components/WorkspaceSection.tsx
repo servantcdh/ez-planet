@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   type CSSProperties,
   useCallback,
@@ -113,24 +112,6 @@ function WorkspaceSection() {
 
   const textContent =
     typeof selectedRow?.value === "string" ? selectedRow.value : "";
-
-  useEffect(() => {
-    console.log("선택된 열의 콘텐츠 타입", contentType);
-  }, [contentType]);
-
-  useEffect(() => {
-    console.log("비차트 데이터(이미지/텍스트)", selectedRow);
-  }, [selectedRow]);
-
-  useEffect(() => {
-    console.log("차트(넘버) 데이터", {
-      mode: chartAxisSnapshot.mode,
-      xAxis: chartAxisSnapshot.xAxis,
-      yAxis: chartAxisSnapshot.yAxis,
-      canRender: chartAxisSnapshot.canRender,
-      source: chartAxisSnapshot.source,
-    });
-  }, [chartAxisSnapshot]);
 
   useEffect(() => {
     const contextKey = elementId ?? contentSetId ?? null;
@@ -387,7 +368,6 @@ function WorkspaceSection() {
     isRecordViewMode &&
     recordClassificationBadges.length > 0 &&
     layerMode.includes(OVERLAY_LAYER_INDEX);
-  console.log({ resolvedWorkspaceViewMode, contentType });
   return (
     <div
       className={`content-wrapper${shouldShowRecordClassification ? " content-wrapper--record-classified" : ""}`}
