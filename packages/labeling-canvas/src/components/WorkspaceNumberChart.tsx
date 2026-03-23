@@ -1400,12 +1400,12 @@ function WorkspaceNumberChart({
           const elementId =
             typeof point.elementId === "string" && point.elementId.length > 0
               ? point.elementId
-              : null;
+              : `row-${point.rowIndex}`;
           const columnName =
             typeof point.columnId === "string" && point.columnId.length > 0
               ? point.columnId
               : null;
-          if (!elementId || !columnName) {
+          if (!columnName) {
             return;
           }
           const dedupeKey = `${elementId}::${columnName}`;

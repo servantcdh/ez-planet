@@ -220,14 +220,15 @@ function computeChartAxisSnapshot(
     const series = effectiveColumns.map((columnId) => {
       const points = xAxisTicks.map((tick) => {
         const row = state.rows[tick.rowIndex ?? 0];
+        const rowIndex = tick.rowIndex ?? 0;
         const rawValue = row ? (row[columnId] ?? null) : null;
         const elementId =
           row && typeof row.elementId === "string" && row.elementId.length > 0
             ? row.elementId
-            : null;
+            : `row-${rowIndex}`;
         return {
           axisKey: tick.key,
-          rowIndex: tick.rowIndex ?? 0,
+          rowIndex,
           columnId,
           elementId,
           rawValue,
@@ -271,7 +272,7 @@ function computeChartAxisSnapshot(
       const elementId =
         row && typeof row.elementId === "string" && row.elementId.length > 0
           ? row.elementId
-          : null;
+          : `row-${rowIndex}`;
       return {
         axisKey: tick.key,
         rowIndex,
